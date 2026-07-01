@@ -203,6 +203,126 @@
       "active": true,
       "notes": "",
       "added": "2026-07-01"
+    },
+    {
+      "id": "deepseek-news",
+      "name": "DeepSeek News",
+      "url": "https://api-docs.deepseek.com/news/",
+      "type": "blog",
+      "feed": "",
+      "priority": 1,
+      "usefulness": 0,
+      "active": true,
+      "notes": "",
+      "added": "2026-07-01"
+    },
+    {
+      "id": "qwen-blog",
+      "name": "Qwen Blog",
+      "url": "https://qwenlm.github.io/blog/",
+      "type": "blog",
+      "feed": "https://qwenlm.github.io/blog/index.xml",
+      "priority": 1,
+      "usefulness": 0,
+      "active": true,
+      "notes": "",
+      "added": "2026-07-01"
+    },
+    {
+      "id": "moonshot-ai-kimi-research",
+      "name": "Moonshot AI (Kimi) Research",
+      "url": "https://www.moonshot.ai/en",
+      "type": "blog",
+      "feed": "",
+      "priority": 1,
+      "usefulness": 0,
+      "active": true,
+      "notes": "",
+      "added": "2026-07-01"
+    },
+    {
+      "id": "z-ai-zhipu-glm-blog",
+      "name": "Z.ai (Zhipu/GLM) Blog",
+      "url": "https://z.ai/blog",
+      "type": "blog",
+      "feed": "",
+      "priority": 1,
+      "usefulness": 0,
+      "active": true,
+      "notes": "",
+      "added": "2026-07-01"
+    },
+    {
+      "id": "minimax-news",
+      "name": "MiniMax News",
+      "url": "https://www.minimax.io/news",
+      "type": "blog",
+      "feed": "",
+      "priority": 1,
+      "usefulness": 0,
+      "active": true,
+      "notes": "",
+      "added": "2026-07-01"
+    },
+    {
+      "id": "prime-intellect-blog",
+      "name": "Prime Intellect Blog",
+      "url": "https://www.primeintellect.ai/blog",
+      "type": "blog",
+      "feed": "",
+      "priority": 1,
+      "usefulness": 0,
+      "active": true,
+      "notes": "",
+      "added": "2026-07-01"
+    },
+    {
+      "id": "physical-intelligence-blog",
+      "name": "Physical Intelligence Blog",
+      "url": "https://www.pi.website/blog",
+      "type": "blog",
+      "feed": "",
+      "priority": 1,
+      "usefulness": 0,
+      "active": true,
+      "notes": "",
+      "added": "2026-07-01"
+    },
+    {
+      "id": "berkeley-rail-lab",
+      "name": "Berkeley RAIL Lab",
+      "url": "https://rail.eecs.berkeley.edu/",
+      "type": "blog",
+      "feed": "",
+      "priority": 1,
+      "usefulness": 0,
+      "active": true,
+      "notes": "",
+      "added": "2026-07-01"
+    },
+    {
+      "id": "stanford-iris-lab",
+      "name": "Stanford IRIS Lab",
+      "url": "https://irislab.stanford.edu/",
+      "type": "blog",
+      "feed": "",
+      "priority": 1,
+      "usefulness": 0,
+      "active": true,
+      "notes": "",
+      "added": "2026-07-01"
+    },
+    {
+      "id": "nvidia-isaac-robotics",
+      "name": "NVIDIA Isaac / Robotics",
+      "url": "https://developer.nvidia.com/blog/category/robotics/",
+      "type": "blog",
+      "feed": "",
+      "priority": 1,
+      "usefulness": 0,
+      "active": true,
+      "notes": "",
+      "added": "2026-07-01"
     }
   ]
 }
