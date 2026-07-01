@@ -130,12 +130,19 @@ novel/important first, aiming for ~`digest.target_paper_count` total. These are
 **guidelines** — go over or under when the day's crop justifies it. De-duplicate
 near-identical papers, merge cross-posts.
 
+**Optional "near-miss" section (calibration).** If `interests.extra_instructions`
+requests it (e.g. a calibration window), add a short "Didn't quite make the cut"
+section after the main sections with 3-5 papers that were relevant but fell just
+below the bar — one line each: link, what it is, why it was borderline. These do
+**not** count toward `digest.target_paper_count` and are **NOT** marked seen in
+step 6, so they can resurface if they gain traction.
+
 ### 6. Render + record
 
 Write the digest to `digests/YYYY-MM-DD.md` following `email.style_instructions`
 (TL;DR: one-line takeaway per paper, 1-2 sentences on why it matters / what's
 novel, every paper linked, clear section headers). Then mark each raised paper
-seen:
+seen — **main-section papers only, never the near-miss list**:
 
 ```
 papers.py seen add "<url-or-id>" --title "<title>" --source "<source name>" --run-id <run_id>
