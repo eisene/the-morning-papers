@@ -71,6 +71,12 @@
       "title": "Orca: General World Foundation Model",
       "source": "HuggingFace",
       "run_id": "72047e89bbc3"
+    },
+    "arxiv:2606.31048": {
+      "first_raised": "2026-07-01",
+      "title": "CoT Distillation to Qwen2.5-7B (John O'Bryan math)",
+      "source": "arXiv",
+      "run_id": ""
     }
   }
 }
