@@ -197,6 +197,18 @@ def test_email_render():
         capture_output=True, text=True,
     )
     check("email without recipient errors", r2.returncode == 2)
+    # himalaya path must emit MML (not raw MIME), else himalaya wraps the body
+    # as a "noname" attachment. Assert the dry-run template is MML-shaped.
+    rh = subprocess.run(
+        [sys.executable, str(EMAIL), "--body-file", str(dg / "test.md"),
+         "--to", "a@b.com", "--transport", "himalaya", "--dry-run"],
+        env=_env, capture_output=True, text=True,
+    )
+    out = rh.stdout
+    check("himalaya emits MML multipart", "<#multipart type=alternative>" in out and "<#/multipart>" in out)
+    check("himalaya MML has html part", "<#part type=text/html>" in out)
+    check("himalaya MML not raw MIME", "Content-Transfer-Encoding: base64" not in out)
+    check("himalaya MML headers plain", out.lstrip().startswith("[dry-run]") and "To: a@b.com" in out)
 
 
 TESTS = [
