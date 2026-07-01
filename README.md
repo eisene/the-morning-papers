@@ -52,7 +52,7 @@ verbosity and cap size, and any extra instructions.
 
 Preview without sending:
 ```bash
-python3 scripts/send_email.py --body-file digests/$(date +%F).md --dry-run
+uv run scripts/send_email.py --body-file digests/$(date +%F).md --dry-run
 ```
 
 ### Markdown rendering

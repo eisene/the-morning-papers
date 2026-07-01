@@ -14,5 +14,5 @@ status:
 
 # Preview today's digest email without sending.
 dry-run:
-	MORNING_PAPERS_HOME=$(CURDIR) python3 scripts/send_email.py \
+	MORNING_PAPERS_HOME=$(CURDIR) uv run scripts/send_email.py \
 		--body-file digests/$$(date +%F).md --dry-run

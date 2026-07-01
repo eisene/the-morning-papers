@@ -144,13 +144,14 @@ papers.py seen add "<url-or-id>" --title "<title>" --source "<source name>" --ru
 ### 7. Email
 
 ```
-python3 scripts/send_email.py --body-file digests/YYYY-MM-DD.md
+uv run scripts/send_email.py --body-file digests/YYYY-MM-DD.md
 ```
 
-Verify exit code 0. (Use `--dry-run` first if unsure.) HTML is rendered with the
-`markdown` package when available (declared as a PEP 723 dep, so `uv run
-scripts/send_email.py ...` provisions it automatically); otherwise a stdlib
-fallback renders headings/lists/links.
+Verify exit code 0. (Use `--dry-run` first if unsure.) `uv run` provisions the
+`markdown` package (declared as a PEP 723 dep) in a cached ephemeral env, so
+digests render tables, fenced code, and nested lists with no venv to manage. If
+`uv` is unavailable, fall back to `python3 scripts/send_email.py ...` — it uses
+`markdown` if installed, else a stdlib renderer for headings/lists/links.
 
 ### 8. Finish
 
