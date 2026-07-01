@@ -1,3 +1,76 @@
 {
-  "papers": {}
+  "papers": {
+    "arxiv:2606.31612": {
+      "first_raised": "2026-07-01",
+      "title": "What Memory Do GUI Agents Really Need? (ATMem)",
+      "source": "arXiv",
+      "run_id": "72047e89bbc3"
+    },
+    "arxiv:2606.31650": {
+      "first_raised": "2026-07-01",
+      "title": "ECHO: Selective Turn Memory in Agentic RL",
+      "source": "arXiv",
+      "run_id": "72047e89bbc3"
+    },
+    "arxiv:2606.23127": {
+      "first_raised": "2026-07-01",
+      "title": "Managing Procedural Memory in LLM Agents (AFTER)",
+      "source": "HuggingFace",
+      "run_id": "72047e89bbc3"
+    },
+    "arxiv:2606.32017": {
+      "first_raised": "2026-07-01",
+      "title": "TRIAGE: Role-Typed Credit Assignment",
+      "source": "arXiv",
+      "run_id": "72047e89bbc3"
+    },
+    "arxiv:2606.32034": {
+      "first_raised": "2026-07-01",
+      "title": "QVal: Evaluating Dense Supervision Signals",
+      "source": "HuggingFace",
+      "run_id": "72047e89bbc3"
+    },
+    "arxiv:2606.30406": {
+      "first_raised": "2026-07-01",
+      "title": "MOPD: Multi-Teacher On-Policy Distillation",
+      "source": "HuggingFace",
+      "run_id": "72047e89bbc3"
+    },
+    "arxiv:2606.30626": {
+      "first_raised": "2026-07-01",
+      "title": "DOPD: Dual On-Policy Distillation",
+      "source": "HuggingFace",
+      "run_id": "72047e89bbc3"
+    },
+    "arxiv:2606.29215": {
+      "first_raised": "2026-07-01",
+      "title": "Multi-Block Diffusion Language Models",
+      "source": "HuggingFace",
+      "run_id": "72047e89bbc3"
+    },
+    "arxiv:2606.30062": {
+      "first_raised": "2026-07-01",
+      "title": "Little Brains, Big Feats: Compact LMs",
+      "source": "HuggingFace",
+      "run_id": "72047e89bbc3"
+    },
+    "arxiv:2606.32038": {
+      "first_raised": "2026-07-01",
+      "title": "Introspective Coupling",
+      "source": "arXiv",
+      "run_id": "72047e89bbc3"
+    },
+    "arxiv:2606.32032": {
+      "first_raised": "2026-07-01",
+      "title": "RL with Metacognitive Feedback (RLMF)",
+      "source": "arXiv",
+      "run_id": "72047e89bbc3"
+    },
+    "arxiv:2606.30534": {
+      "first_raised": "2026-07-01",
+      "title": "Orca: General World Foundation Model",
+      "source": "HuggingFace",
+      "run_id": "72047e89bbc3"
+    }
+  }
 }
