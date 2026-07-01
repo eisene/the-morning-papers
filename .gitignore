@@ -5,3 +5,8 @@
 __pycache__/
 .env
 config/secrets.json
+# blogwatcher SQLite sidecars (the .db itself IS committed to preserve the
+# read/unread baseline; its WAL/journal are transient and must not be)
+state/blogwatcher.db-wal
+state/blogwatcher.db-shm
+state/blogwatcher.db-journal

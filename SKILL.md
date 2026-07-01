@@ -99,9 +99,25 @@ Capture `run_id`, `attempt`, `max_attempts`, `wait_minutes` from the JSON.
   cs.AI` plus targeted keyword queries. Prefer `sortBy=submittedDate`.
 - **Hugging Face papers**: `web_extract` on `https://huggingface.co/papers`
   (and `?date=YYYY-MM-DD`) to get trending/upvoted items.
-- **Blogs & other sources**: for each active `type:blog`/`other` source,
-  `web_extract` the URL (or use the `blogwatcher` skill if installed and a feed
-  is set). Note anything new since the last run.
+- **Blogs & other sources**: two paths depending on whether a feed is set.
+  - *Feed-backed blogs* (sources with a non-empty `feed`, tracked by
+    blogwatcher-cli): run one scan, then read only new posts. Set the DB path so
+    state lives in the repo:
+    ```
+    export BLOGWATCHER_DB="$MORNING_PAPERS_HOME/state/blogwatcher.db"
+    blogwatcher-cli scan            # detects new posts across all tracked feeds
+    blogwatcher-cli articles        # lists only UNREAD (new since last run)
+    ```
+    `web_extract` the URLs of interesting new articles for judging, then
+    `printf 'y\n' | blogwatcher-cli read-all` once the run succeeds so they don't
+    resurface tomorrow. blogwatcher keeps its own read/unread state — this is the
+    "what's new since yesterday" detector for blogs. If blogwatcher-cli isn't
+    installed, fall back to `web_extract` on each feed URL.
+  - *Feedless blogs* (empty `feed`: e.g. Anthropic, Meta, DeepSeek, Moonshot,
+    Z.ai, MiniMax, Cohere, AI2, Physical Intelligence, Prime Intellect, Berkeley
+    RAIL, Stanford IRIS): `web_extract` the URL directly and note anything new
+    vs. the last run. These are NOT in blogwatcher (they have no discoverable
+    RSS, and a feedless source hangs `scan`).
 
 ### 3. Dedupe
 

@@ -39,8 +39,20 @@ Then ask Hermes to "set up the morning papers" — it runs an interview for your
 email address, topics/keywords, labs/authors, seed blog confirmation, digest
 verbosity and cap size, and any extra instructions.
 
-### Email transport
+### Blog watching (blogwatcher-cli)
 
+Feed-backed blogs are tracked with [blogwatcher-cli](https://github.com/JulienTant/blogwatcher-cli)
+so the daily run only surfaces posts that are *new* since yesterday, instead of
+re-scraping every blog. Its SQLite DB lives at `state/blogwatcher.db` (set
+`BLOGWATCHER_DB` to point there). Sources with no discoverable RSS feed stay on
+direct `web_extract` and are intentionally NOT tracked (a feedless source hangs
+`scan`). Install:
+
+```bash
+curl -sL https://github.com/JulienTant/blogwatcher-cli/releases/latest/download/blogwatcher-cli_linux_amd64.tar.gz | tar xz -C ~/.local/bin blogwatcher-cli
+```
+
+### Email transport
 - **himalaya** (recommended): configure the `himalaya` CLI once; `email.transport`
   defaults to `auto` and will use it.
 - **SMTP**: set host/port/username in `config.json` and export the password:
