@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.9"
+# dependencies = ["markdown>=3.5"]
+# ///
 """Send a Morning Papers digest email.
 
 Two transports:
@@ -7,7 +11,14 @@ Two transports:
 
 Reads recipient / subject / from from config/config.json unless overridden by
 flags. Body is read from --body-file (Markdown). For SMTP a text/plain +
-text/html (Markdown lightly converted) multipart is sent.
+text/html multipart is sent.
+
+Markdown rendering prefers the `markdown` package (tables, fenced code, nested
+lists, footnotes) and falls back to a stdlib-only converter when it is absent,
+so the script works three ways:
+  uv run scripts/send_email.py ...      # uv provisions markdown per PEP 723
+  python3 scripts/send_email.py ...     # uses markdown if installed
+  python3 scripts/send_email.py ...     # bare stdlib fallback otherwise
 
 Usage:
   send_email.py --body-file digests/2026-07-01.md
@@ -31,6 +42,18 @@ from pathlib import Path
 ROOT = Path(os.environ.get("MORNING_PAPERS_HOME", Path(__file__).resolve().parent.parent))
 CONFIG_FILE = ROOT / "config" / "config.json"
 
+_BODY_STYLE = (
+    "font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;"
+    "max-width:720px;margin:auto;line-height:1.5;color:#1a1a1a"
+)
+_TABLE_CSS = (
+    "<style>table{border-collapse:collapse;margin:8px 0}"
+    "th,td{border:1px solid #ddd;padding:6px 10px;text-align:left}"
+    "th{background:#f5f5f5}code{background:#f2f2f2;padding:1px 4px;border-radius:3px}"
+    "pre{background:#f6f8fa;padding:12px;border-radius:6px;overflow:auto}"
+    "blockquote{border-left:3px solid #ddd;margin:8px 0;padding:2px 12px;color:#555}</style>"
+)
+
 
 def load_config() -> dict:
     if CONFIG_FILE.exists():
@@ -39,7 +62,22 @@ def load_config() -> dict:
 
 
 def md_to_html(md: str) -> str:
-    """Minimal, dependency-free Markdown -> HTML (headings, bold, links, lists)."""
+    """Markdown -> styled HTML. Uses the `markdown` package when available."""
+    try:
+        import markdown  # provisioned by uv (PEP 723) or system install
+        inner = markdown.markdown(
+            md, extensions=["extra", "sane_lists", "admonition"]
+        )
+    except ImportError:
+        inner = _md_to_html_basic(md)
+    return (
+        f"<html><head>{_TABLE_CSS}</head>"
+        f'<body style="{_BODY_STYLE}">{inner}</body></html>'
+    )
+
+
+def _md_to_html_basic(md: str) -> str:
+    """Stdlib-only fallback: headings, bold/em/code, links, unordered lists."""
     html_lines, in_ul = [], False
     for line in md.splitlines():
         raw = line.rstrip()
@@ -64,12 +102,7 @@ def md_to_html(md: str) -> str:
             html_lines.append(f"<p>{_inline(raw)}</p>")
     if in_ul:
         html_lines.append("</ul>")
-    body = "\n".join(html_lines)
-    return (
-        "<html><body style=\"font-family:-apple-system,Segoe UI,Helvetica,Arial,"
-        "sans-serif;max-width:720px;margin:auto;line-height:1.5;color:#1a1a1a\">"
-        f"{body}</body></html>"
-    )
+    return "\n".join(html_lines)
 
 
 def _inline(s: str) -> str:

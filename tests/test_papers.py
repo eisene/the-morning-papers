@@ -169,10 +169,26 @@ def test_email_render():
     check("email dry-run subject templated with date", _dt.date.today().isoformat() in r.stdout)
     sys.path.insert(0, str(REPO / "scripts"))
     import send_email  # noqa: E402
+    # md_to_html uses the `markdown` package when available, else the stdlib
+    # fallback. Assert on renderer-agnostic essentials plus the styled shell.
     html = send_email.md_to_html(body)
-    check("md->html heading", "<h1>Digest</h1>" in html and "<h2>Sec</h2>" in html)
-    check("md->html list+link", '<li>' in html and '<a href="https://arxiv.org/abs/2401.01234">' in html)
+    check("md->html heading", "<h1>" in html and "Digest" in html)
+    check("md->html list+link", "<li>" in html and '<a href="https://arxiv.org/abs/2401.01234">' in html)
     check("md->html bold+em+code", "<strong>" in html and "<em>" in html and "<code>" in html)
+    check("md->html styled shell", "<html>" in html and "max-width:720px" in html)
+    # stdlib fallback path stands alone (headings, list, inline)
+    basic = send_email._md_to_html_basic(body)
+    check("fallback renders heading+list+bold", "<h1>Digest</h1>" in basic
+          and "<li>" in basic and "<strong>" in basic)
+    # rich constructs only the package handles: tables + fenced code
+    rich = "| a | b |\n|---|---|\n| 1 | 2 |\n\n```py\nx=1\n```\n"
+    rhtml = send_email.md_to_html(rich)
+    try:
+        import markdown  # noqa: F401
+        check("md->html table (pkg)", "<table>" in rhtml and "<td>1</td>" in rhtml)
+        check("md->html fenced code (pkg)", "<pre>" in rhtml and "x=1" in rhtml)
+    except ImportError:
+        check("md package absent -> fallback still returns html", "<html>" in rhtml)
     # recipient/host required errors (non-dry, no config)
     r2 = subprocess.run(
         [sys.executable, str(EMAIL), "--body-file", str(dg / "test.md"),

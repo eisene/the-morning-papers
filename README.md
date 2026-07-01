@@ -55,6 +55,21 @@ Preview without sending:
 python3 scripts/send_email.py --body-file digests/$(date +%F).md --dry-run
 ```
 
+### Markdown rendering
+
+The digest HTML is rendered with the [`markdown`](https://pypi.org/project/markdown/)
+package (tables, fenced code, nested lists, footnotes). The script declares it
+as a PEP 723 inline dependency, so it runs three ways with no venv to manage:
+
+```bash
+uv run scripts/send_email.py --body-file digests/$(date +%F).md   # uv provisions markdown
+python3 scripts/send_email.py --body-file digests/$(date +%F).md   # uses markdown if installed
+python3 scripts/send_email.py --body-file digests/$(date +%F).md   # bare stdlib fallback otherwise
+```
+
+If `markdown` is unavailable, a built-in stdlib fallback still renders
+headings, lists, links, and inline formatting (tables degrade to plain text).
+
 ## Adjusting it over time
 
 Everything is a CLI verb (Hermes maps natural language to these):
