@@ -1,0 +1,1 @@
+{"ts": "2026-07-01T19:20:00+00:00", "paper": "2606.31048", "key": "arxiv:2606.31048", "verdict": "not-useful", "note": "User agrees: correctly excluded. Borderline but reads as a technical report on a complex (single-domain LoRA CoT distillation) training run rather than a new method — the 'minor tweak' class to keep filtering out."}
