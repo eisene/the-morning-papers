@@ -114,20 +114,28 @@ def _inline(s: str) -> str:
 
 
 def send_himalaya(to: str, sender: str, subject: str, body_md: str, html: str, dry: bool) -> int:
-    # Build a MIME message and pipe it to `himalaya template send`.
-    msg = MIMEMultipart("alternative")
-    msg["To"] = to
+    # himalaya `template send` consumes MML (its own markup), NOT a pre-built
+    # MIME message. Feeding raw multipart MIME makes himalaya wrap the whole
+    # blob as one opaque "noname" attachment. So emit headers + an MML
+    # alternative body; himalaya compiles it to proper MIME on send.
+    headers = [f"To: {to}"]
     if sender:
-        msg["From"] = sender
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body_md, "plain", "utf-8"))
-    msg.attach(MIMEText(html, "html", "utf-8"))
-    raw = msg.as_string()
+        headers.append(f"From: {sender}")
+    headers.append(f"Subject: {subject}")
+    template = (
+        "\n".join(headers)
+        + "\n\n"
+        + "<#multipart type=alternative>\n"
+        + body_md.rstrip("\n") + "\n"
+        + "<#part type=text/html>\n"
+        + html + "\n"
+        + "<#/multipart>\n"
+    )
     if dry:
-        print("[dry-run] himalaya template send <<<\n" + raw[:800] + "\n...")
+        print("[dry-run] himalaya template send <<<\n" + template)
         return 0
     proc = subprocess.run(
-        ["himalaya", "template", "send"], input=raw, text=True,
+        ["himalaya", "template", "send"], input=template, text=True,
         capture_output=True,
     )
     sys.stdout.write(proc.stdout)
