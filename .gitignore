@@ -1,0 +1,7 @@
+# state files carry per-machine history; keep config + code in git,
+# but never commit secrets or scratch.
+*.tmp
+*.pyc
+__pycache__/
+.env
+config/secrets.json

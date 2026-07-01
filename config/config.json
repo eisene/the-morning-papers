@@ -1,0 +1,34 @@
+{
+  "email": {
+    "to": "",
+    "from": "",
+    "subject_template": "The Morning Papers — {date}",
+    "style_instructions": "TL;DR style. Lead with a one-line takeaway per paper, then 1-2 sentences on why it matters and what is novel. Group into clearly titled sections. Keep it skimmable; link every paper.",
+    "transport": "auto"
+  },
+  "smtp": {
+    "host": "",
+    "port": 587,
+    "username": "",
+    "use_tls": true,
+    "password_env": "MORNING_PAPERS_SMTP_PASSWORD"
+  },
+  "digest": {
+    "target_sections": 5,
+    "target_paper_count": 12,
+    "verbosity": "medium"
+  },
+  "evaluation": {
+    "novelty_criteria": "Prefer genuinely new ideas: new problem framings, architectures, training objectives, theoretical results, or surprising empirical findings. Down-rank minor tweaks to training protocols, incremental benchmark bumps, routine scaling reports, and dataset/leaderboard papers with no new idea.",
+    "usefulness_criteria": "A paper is useful if it changes how the reader would think or build: actionable methods, strong evidence, or ideas that transfer.",
+    "organization": "Cluster by theme, not by source. Put the most novel/important items first within each section."
+  },
+  "schedule": {
+    "time": "10:00",
+    "tz": "America/New_York"
+  },
+  "retry": {
+    "max_attempts": 3,
+    "wait_minutes": 20
+  }
+}
