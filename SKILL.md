@@ -146,10 +146,10 @@ novel/important first, aiming for ~`digest.target_paper_count` total. These are
 **guidelines** — go over or under when the day's crop justifies it. De-duplicate
 near-identical papers, merge cross-posts.
 
-**Optional "near-miss" section (calibration).** If `interests.extra_instructions`
-requests it (e.g. a calibration window), add a short "Didn't quite make the cut"
-section after the main sections with 3-5 papers that were relevant but fell just
-below the bar — one line each: link, what it is, why it was borderline. These do
+**"Near-miss" section.** If `interests.extra_instructions` requests it (a
+standing preference by default), add a "Didn't quite make the cut" section after
+the main sections with 3-5 papers that were relevant but fell just below the bar
+— one skimmable line each: link, what it is, why it was borderline. These do
 **not** count toward `digest.target_paper_count` and are **NOT** marked seen in
 step 6, so they can resurface if they gain traction.
 
