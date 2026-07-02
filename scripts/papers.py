@@ -444,6 +444,17 @@ def cmd_seen(args):
               "record": papers.get(key)})
     elif a == "add":
         key = _canonical_paper_id(args.paper)
+        if getattr(args, "dry_run", False):
+            _out({
+                "dry_run": True,
+                "would_record": {
+                    "key": key,
+                    "title": args.title or "",
+                    "source": args.source or "",
+                    "run_id": args.run_id or "",
+                },
+            })
+            return
         if key not in papers:
             papers[key] = {
                 "first_raised": TODAY(),
@@ -519,6 +530,17 @@ def cmd_feedback(args):
 def cmd_run(args):
     a = args.run_action
     if a == "start":
+        if getattr(args, "dry_run", False):
+            run_id = f"dry-run-{TODAY()}"
+            _out({
+                "run_id": run_id,
+                "date": TODAY(),
+                "attempt": 0,
+                "max_attempts": 0,
+                "wait_minutes": 0,
+                "dry_run": True,
+            })
+            return
         cfg = _load(CONFIG_FILE, default_config)
         retry = _load(RETRY_FILE, default_retry)
         today = TODAY()
@@ -547,6 +569,9 @@ def cmd_run(args):
             "sections": args.sections,
             "error": args.error or "",
         }
+        if getattr(args, "dry_run", False):
+            _out({"dry_run": True, "would_record": rec})
+            return
         _append_jsonl(RUNS_FILE, rec)
         retry = _load(RETRY_FILE, default_retry)
         if args.status == "success":
@@ -659,6 +684,7 @@ def build_parser():
     a.add_argument("--title", default="")
     a.add_argument("--source", default="")
     a.add_argument("--run-id", default="")
+    a.add_argument("--dry-run", action="store_true", help="print what would be recorded, don't write state")
     a.set_defaults(func=cmd_seen)
     ses.add_parser("filter", help="stdin ids -> only-unseen").set_defaults(func=cmd_seen)
     ses.add_parser("list").set_defaults(func=cmd_seen)
@@ -681,7 +707,9 @@ def build_parser():
     # run / retry
     rn = sub.add_parser("run", help="run history + retry state")
     rns = rn.add_subparsers(dest="run_action", required=True)
-    rns.add_parser("start", help="allocate run_id, increment today's attempt").set_defaults(func=cmd_run)
+    st = rns.add_parser("start", help="allocate run_id, increment today's attempt")
+    st.add_argument("--dry-run", action="store_true", help="no state mutation; returns fake run_id")
+    st.set_defaults(func=cmd_run)
     fi = rns.add_parser("finish")
     fi.add_argument("run_id")
     fi.add_argument("status", choices=["success", "failed"])
@@ -690,6 +718,7 @@ def build_parser():
     fi.add_argument("--sections", type=int, default=0)
     fi.add_argument("--error", default="")
     fi.add_argument("--wait-minutes", default="")
+    fi.add_argument("--dry-run", action="store_true", help="print what would be recorded, don't write state")
     fi.set_defaults(func=cmd_run)
     lg = rns.add_parser("log")
     lg.add_argument("--limit", type=int, default=20)
