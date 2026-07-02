@@ -77,6 +77,96 @@
       "title": "CoT Distillation to Qwen2.5-7B (John O'Bryan math)",
       "source": "arXiv",
       "run_id": ""
+    },
+    "arxiv:2607.01224": {
+      "first_raised": "2026-07-02",
+      "title": "AutoMem: Automated Learning of Memory as a Cognitive Skill",
+      "source": "arXiv cs.CL",
+      "run_id": "0b5ebbafb5db"
+    },
+    "arxiv:2607.01071": {
+      "first_raised": "2026-07-02",
+      "title": "MemSyco-Bench: Benchmarking Sycophancy in Agent Memory",
+      "source": "Hugging Face Papers",
+      "run_id": "0b5ebbafb5db"
+    },
+    "arxiv:2607.00407": {
+      "first_raised": "2026-07-02",
+      "title": "Personalization as Inverse Planning (SPIRE)",
+      "source": "Hugging Face Papers",
+      "run_id": "0b5ebbafb5db"
+    },
+    "arxiv:2607.01181": {
+      "first_raised": "2026-07-02",
+      "title": "Right in the Right Way: LM Training with Verifiable Rewards and Human Demonstrations",
+      "source": "arXiv cs.LG",
+      "run_id": "0b5ebbafb5db"
+    },
+    "arxiv:2607.01179": {
+      "first_raised": "2026-07-02",
+      "title": "QuasiMoTTo: Quasi-Monte Carlo Test-Time Scaling",
+      "source": "arXiv cs.LG",
+      "run_id": "0b5ebbafb5db"
+    },
+    "arxiv:2607.01232": {
+      "first_raised": "2026-07-02",
+      "title": "Is One Layer Enough? Single Transformer Layer RL Training",
+      "source": "arXiv cs.LG",
+      "run_id": "0b5ebbafb5db"
+    },
+    "arxiv:2606.31551": {
+      "first_raised": "2026-07-02",
+      "title": "AutoTrainess: Teaching Language Models to Improve Language Models Autonomously",
+      "source": "Hugging Face Papers",
+      "run_id": "0b5ebbafb5db"
+    },
+    "arxiv:2607.01120": {
+      "first_raised": "2026-07-02",
+      "title": "Next-Generation Agentic RL Systems (AReaL2.0)",
+      "source": "arXiv cs.LG",
+      "run_id": "0b5ebbafb5db"
+    },
+    "arxiv:2607.01084": {
+      "first_raised": "2026-07-02",
+      "title": "Can Agents Generalize to the Open World? (OpenAgent)",
+      "source": "arXiv cs.AI",
+      "run_id": "0b5ebbafb5db"
+    },
+    "arxiv:2606.28436": {
+      "first_raised": "2026-07-02",
+      "title": "Dockerless: Environment-Free Program Verifier for Coding Agents",
+      "source": "Hugging Face Papers",
+      "run_id": "0b5ebbafb5db"
+    },
+    "arxiv:2607.01002": {
+      "first_raised": "2026-07-02",
+      "title": "Logit-Contribution Scoring Identifies Non-Literal Retrieval Heads (LOCOS)",
+      "source": "arXiv cs.CL",
+      "run_id": "0b5ebbafb5db"
+    },
+    "arxiv:2607.01033": {
+      "first_raised": "2026-07-02",
+      "title": "The Model Organism Lottery",
+      "source": "arXiv cs.LG",
+      "run_id": "0b5ebbafb5db"
+    },
+    "arxiv:2607.01218": {
+      "first_raised": "2026-07-02",
+      "title": "The State-Prediction Separation Hypothesis",
+      "source": "arXiv cs.LG",
+      "run_id": "0b5ebbafb5db"
+    },
+    "arxiv:2607.01077": {
+      "first_raised": "2026-07-02",
+      "title": "Message Passing Enables Efficient Reasoning",
+      "source": "arXiv cs.LG",
+      "run_id": "0b5ebbafb5db"
+    },
+    "arxiv:2607.00272": {
+      "first_raised": "2026-07-02",
+      "title": "ASPIRE: Agentic Skills Discovery for Robotics",
+      "source": "Hugging Face Papers",
+      "run_id": "0b5ebbafb5db"
     }
   }
 }
