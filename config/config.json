@@ -1,9 +1,9 @@
 {
   "email": {
-    "to": "eeisenst@gmail.com",
-    "from": "eeisenst@gmail.com",
+    "to": "",
+    "from": "",
     "subject_template": "The Morning Papers — {date}",
-    "style_instructions": "TL;DR style. Open with a 2-3 item 'Top Picks' highlighting the most novel/important papers of the day. Then themed sections (~5). For each paper: a one-line takeaway, then 1-2 sentences on why it matters and what is genuinely novel. Flag [open-weights] releases explicitly and include model/code/GitHub links when available. Every paper links to its arXiv abstract or source. Keep it skimmable; no filler. If it was a thin day, a shorter digest is fine.",
+    "style_instructions": "TL;DR style. Lead with a one-line takeaway per paper, then 1-2 sentences on why it matters and what is novel. Group into clearly titled sections. Keep it skimmable; link every paper.",
     "transport": "auto"
   },
   "smtp": {
@@ -24,7 +24,7 @@
     "organization": "Cluster by theme, not by source. Put the most novel/important items first within each section."
   },
   "schedule": {
-    "time": "07:00",
+    "time": "10:00",
     "tz": "America/New_York"
   },
   "retry": {

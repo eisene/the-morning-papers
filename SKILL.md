@@ -91,7 +91,7 @@ Confirm the seed blog list explicitly.
    (`python3 scripts/papers.py config set email.subject_template "... {date}"`).
 
 Finish by confirming email transport works (see Email Delivery) and offering a
-`--dry-run` preview.
+full pipeline `--dry-run` preview (see the Dry-Run section).
 
 ## Daily Run Procedure
 
@@ -221,6 +221,43 @@ python3 scripts/papers.py run should-retry
   user that today's digest failed, including the last error. Do not keep trying.
 
 The retry counter auto-resets on the next calendar day or on any success.
+
+## Dry-Run / Model Comparison
+
+To test a run without mutating any state (no retry bump, no seen-paper
+ledger change, no run history entry), pass `--dry-run` to the three
+state-mutating commands:
+
+| Normal step | Dry-run equivalent |
+|---|---|
+| `python3 scripts/papers.py run start` | `python3 scripts/papers.py run start --dry-run` — returns `run_id: "dry-run-YYYY-MM-DD"`, skips retry state |
+| `python3 scripts/papers.py seen add` | `python3 scripts/papers.py seen add --dry-run` — prints what would be recorded, skips the dedup ledger |
+| `python3 scripts/papers.py run finish success` | `python3 scripts/papers.py run finish ... --dry-run` — prints what would be recorded, skips runs.jsonl + retry reset |
+| `uv run scripts/send_email.py` | `uv run scripts/send_email.py --dry-run` — prints the rendered HTML (already worked before this section existed) |
+| `blogwatcher-cli read-all` | **Skip it entirely** — keep posts unread so they appear in the next test run too |
+
+All gather steps (`seen filter`, `web_extract`, `blogwatcher-cli scan`,
+`blogwatcher-cli articles`) are read-only and need no special flag.
+
+A typical comparison run:
+```bash
+python3 scripts/papers.py run start --dry-run
+# run_id is "dry-run-2026-07-02" — use it for seen add --dry-run
+
+# gather, dedupe, select, organize as normal ...
+# render the digest to digests/YYYY-MM-DD.md ...
+
+# preview without emailing:
+python3 scripts/papers.py seen add "arxiv:2401.01234" --title "..." --source "arXiv cs.LG" --run-id "dry-run-2026-07-02" --dry-run
+python3 scripts/papers.py run finish "dry-run-2026-07-02" success --attempt 1 --sections 3 --papers arxiv:2401.01234 --dry-run
+uv run scripts/send_email.py --body-file digests/YYYY-MM-DD.md --dry-run
+
+# nothing was persisted — run again with a different model tomorrow
+# and the same papers will still be candidate
+```
+
+No state file is touched. Tomorrow's real run will see the same candidates
+as if this dry-run never happened.
 
 ## Feedback & Config Verbs (no run needed)
 

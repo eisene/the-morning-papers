@@ -10,7 +10,7 @@
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "arxiv-cs-lg-new",
@@ -22,7 +22,7 @@
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "arxiv-cs-cl-new",
@@ -34,7 +34,7 @@
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "arxiv-cs-ai-new",
@@ -46,19 +46,19 @@
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "openai-blog",
       "name": "OpenAI Blog",
       "url": "https://openai.com/news/",
       "type": "blog",
-      "feed": "https://openai.com/news/rss.xml",
+      "feed": "",
       "priority": 1,
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "anthropic-research",
@@ -70,31 +70,31 @@
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "google-deepmind-blog",
       "name": "Google DeepMind Blog",
       "url": "https://deepmind.google/discover/blog/",
       "type": "blog",
-      "feed": "https://deepmind.google/blog/rss.xml",
+      "feed": "",
       "priority": 1,
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "google-research-blog",
       "name": "Google Research Blog",
       "url": "https://research.google/blog/",
       "type": "blog",
-      "feed": "https://research.google/blog/rss/",
+      "feed": "",
       "priority": 1,
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "meta-ai-blog",
@@ -106,19 +106,19 @@
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "microsoft-research-blog",
       "name": "Microsoft Research Blog",
       "url": "https://www.microsoft.com/en-us/research/blog/",
       "type": "blog",
-      "feed": "https://www.microsoft.com/en-us/research/feed/",
+      "feed": "",
       "priority": 1,
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "bair-blog",
@@ -130,31 +130,31 @@
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "stanford-ai-lab-sail",
       "name": "Stanford AI Lab (SAIL)",
       "url": "https://ai.stanford.edu/blog/",
       "type": "blog",
-      "feed": "https://ai.stanford.edu/blog/feed.xml",
+      "feed": "",
       "priority": 1,
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "mistral-ai-news",
       "name": "Mistral AI News",
       "url": "https://mistral.ai/news/",
       "type": "blog",
-      "feed": "https://mistral.ai/rss.xml",
+      "feed": "",
       "priority": 1,
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "cohere-blog",
@@ -166,7 +166,7 @@
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "ai2-allen-institute-blog",
@@ -178,19 +178,19 @@
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "sebastian-raschka-ahead-of-ai",
       "name": "Sebastian Raschka (Ahead of AI)",
       "url": "https://magazine.sebastianraschka.com/",
       "type": "blog",
-      "feed": "https://magazine.sebastianraschka.com/feed",
+      "feed": "",
       "priority": 1,
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     },
     {
       "id": "lilian-weng-lil-log",
@@ -202,127 +202,7 @@
       "usefulness": 0,
       "active": true,
       "notes": "",
-      "added": "2026-07-01"
-    },
-    {
-      "id": "deepseek-news",
-      "name": "DeepSeek News",
-      "url": "https://api-docs.deepseek.com/news/",
-      "type": "blog",
-      "feed": "",
-      "priority": 1,
-      "usefulness": 0,
-      "active": true,
-      "notes": "",
-      "added": "2026-07-01"
-    },
-    {
-      "id": "qwen-blog",
-      "name": "Qwen Blog",
-      "url": "https://qwenlm.github.io/blog/",
-      "type": "blog",
-      "feed": "https://qwenlm.github.io/blog/index.xml",
-      "priority": 1,
-      "usefulness": 0,
-      "active": true,
-      "notes": "",
-      "added": "2026-07-01"
-    },
-    {
-      "id": "moonshot-ai-kimi-research",
-      "name": "Moonshot AI (Kimi) Research",
-      "url": "https://www.moonshot.ai/en",
-      "type": "blog",
-      "feed": "",
-      "priority": 1,
-      "usefulness": 0,
-      "active": true,
-      "notes": "",
-      "added": "2026-07-01"
-    },
-    {
-      "id": "z-ai-zhipu-glm-blog",
-      "name": "Z.ai (Zhipu/GLM) Blog",
-      "url": "https://z.ai/blog",
-      "type": "blog",
-      "feed": "",
-      "priority": 1,
-      "usefulness": 0,
-      "active": true,
-      "notes": "",
-      "added": "2026-07-01"
-    },
-    {
-      "id": "minimax-news",
-      "name": "MiniMax News",
-      "url": "https://www.minimax.io/news",
-      "type": "blog",
-      "feed": "",
-      "priority": 1,
-      "usefulness": 0,
-      "active": true,
-      "notes": "",
-      "added": "2026-07-01"
-    },
-    {
-      "id": "prime-intellect-blog",
-      "name": "Prime Intellect Blog",
-      "url": "https://www.primeintellect.ai/blog",
-      "type": "blog",
-      "feed": "",
-      "priority": 1,
-      "usefulness": 0,
-      "active": true,
-      "notes": "",
-      "added": "2026-07-01"
-    },
-    {
-      "id": "physical-intelligence-blog",
-      "name": "Physical Intelligence Blog",
-      "url": "https://www.pi.website/blog",
-      "type": "blog",
-      "feed": "",
-      "priority": 1,
-      "usefulness": 0,
-      "active": true,
-      "notes": "",
-      "added": "2026-07-01"
-    },
-    {
-      "id": "berkeley-rail-lab",
-      "name": "Berkeley RAIL Lab",
-      "url": "https://rail.eecs.berkeley.edu/",
-      "type": "blog",
-      "feed": "",
-      "priority": 1,
-      "usefulness": 0,
-      "active": true,
-      "notes": "",
-      "added": "2026-07-01"
-    },
-    {
-      "id": "stanford-iris-lab",
-      "name": "Stanford IRIS Lab",
-      "url": "https://irislab.stanford.edu/",
-      "type": "blog",
-      "feed": "",
-      "priority": 1,
-      "usefulness": 0,
-      "active": true,
-      "notes": "",
-      "added": "2026-07-01"
-    },
-    {
-      "id": "nvidia-isaac-robotics",
-      "name": "NVIDIA Isaac / Robotics",
-      "url": "https://developer.nvidia.com/blog/category/robotics/",
-      "type": "blog",
-      "feed": "https://developer.nvidia.com/blog/category/robotics/feed/",
-      "priority": 1,
-      "usefulness": 0,
-      "active": true,
-      "notes": "",
-      "added": "2026-07-01"
+      "added": "2026-07-02"
     }
   ]
 }
