@@ -118,6 +118,8 @@ Capture `run_id`, `attempt`, `max_attempts`, `wait_minutes` from the JSON.
 - **arXiv**: for each `type:arxiv` source and the user's topics/keywords, query
   the arXiv API (see the `arxiv` skill). Pull the last ~24-48h of `cs.LG/cs.CL/
   cs.AI` plus targeted keyword queries. Prefer `sortBy=submittedDate`.
+  **Always use `https://export.arxiv.org/`** — the command classifier blocks
+  plain `http://` in cron mode.
 - **Hugging Face papers**: `web_extract` on `https://huggingface.co/papers`
   (and `?date=YYYY-MM-DD`) to get trending/upvoted items.
 - **Blogs & other sources**: two paths depending on whether a feed is set.
@@ -312,6 +314,16 @@ recipient look right.
 5. **Hard section/paper limits.** The targets are guidelines; a thin news day
    should produce a shorter digest, not padding.
 6. **Committing secrets.** SMTP passwords go in env vars, never the repo.
+7. **Using `python3 -c` for inline JSON parsing or state checks.** The command
+   classifier blocks `python3 -c` / `python3 -e` in cron mode. Instead:
+   - To read state fields: `python3 scripts/papers.py status | grep -E "..."`
+   - To parse arbitrary JSON: write to a temp file, then use `python3 scripts/papers.py` subcommands.
+   - The `papers.py` CLI and `grep` cover all routine checks; never reach for `python3 -c`.
+8. **Plain HTTP for arXiv or other fetches.** The command classifier blocks
+   `http://` URLs in `curl`/`wget` calls in cron mode. Always use `https://`.
+   The arXiv API works fine at `https://export.arxiv.org/`. Other sources
+   (blogs, feeds) should use `https://` or `web_extract` (which handles TLS
+   internally).
 
 ## Verification Checklist
 
