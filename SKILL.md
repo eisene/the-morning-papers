@@ -50,6 +50,7 @@ state/runs.jsonl          one line per run (success/failed, papers, sections)
 state/feedback.jsonl      useful / not-useful verdicts
 state/retry_state.json    today's attempt count + next-retry timestamp
 digests/YYYY-MM-DD.md     the rendered digest that was emailed
+digests/sample.md         canonical example — follow this format, tone, and structure
 ```
 
 Set `MORNING_PAPERS_HOME` to the repo root before every CLI call (the cron
@@ -100,7 +101,9 @@ Read the current config first: `python3 scripts/papers.py status`,
 `python3 scripts/papers.py interests show`,
 `python3 scripts/papers.py sources list`, and
 `python3 scripts/papers.py feedback summary` (recent verdicts steer
-selection). Then:
+selection). **Always read `digests/sample.md` before rendering** — it is the
+canonical example for format, tone, section structure, and per-paper
+TL;DR conventions. Match its style closely. Then:
 
 ### 1. Start the run (registers the attempt)
 
@@ -175,7 +178,10 @@ step 6, so they can resurface if they gain traction.
 
 ### 6. Render + record
 
-Write the digest to `digests/YYYY-MM-DD.md` following `email.style_instructions`
+Write the digest to `digests/YYYY-MM-DD.md` following
+`email.style_instructions` **and the example in `digests/sample.md`** (which
+overrides style_instructions when they conflict — the sample is the source of
+truth for format, tone, section structure, and per-paper TL;DR conventions).
 (TL;DR: one-line takeaway per paper, 1-2 sentences on why it matters / what's
 novel, every paper linked, clear section headers). Then mark each raised paper
 seen — **main-section papers only, never the near-miss list**:
