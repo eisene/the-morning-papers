@@ -19,7 +19,7 @@
     "verbosity": "medium"
   },
   "evaluation": {
-    "novelty_criteria": "Prefer genuinely new ideas: new problem framings, architectures, training objectives, theoretical results, or surprising empirical findings. Down-rank minor tweaks to training protocols, incremental benchmark bumps, routine scaling reports, and dataset/leaderboard papers with no new idea.",
+    "novelty_criteria": "Prefer genuinely new ideas: new problem framings, architectures, training objectives, theoretical results, or surprising empirical findings. Down-rank minor tweaks to training protocols, incremental benchmark bumps, routine scaling reports, and papers that merely run an existing benchmark on a model with no new idea. BUT: genuinely novel benchmarks — new task formulations, new evaluation paradigms, capability-driven evals with real-world tasks, benchmarks that fill a clear gap — are NOT down-ranked and should be treated as first-class contributions.",
     "usefulness_criteria": "A paper is useful if it changes how the reader would think or build: actionable methods, strong evidence, or ideas that transfer.",
     "organization": "Cluster by theme, not by source. Put the most novel/important items first within each section."
   },

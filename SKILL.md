@@ -171,6 +171,13 @@ novel/important first, aiming for ~`digest.target_paper_count` total. These are
 **guidelines** — go over or under when the day's crop justifies it. De-duplicate
 near-identical papers, merge cross-posts.
 
+**Novel Benchmarks section.** When the day's crop includes genuinely novel
+benchmarks (new task formulations, new evaluation paradigms, capability-driven
+evals, benchmarks filling a clear gap — not papers that just run an existing
+benchmark on a model), give them a dedicated section. These are first-class
+contributions, not near-miss material. Benchmarks that tie to other interests
+(agent eval, memory eval, safety eval, architecture eval) are especially strong.
+
 **"Near-miss" section.** If `interests.extra_instructions` requests it (a
 standing preference by default), add a "Didn't quite make the cut" section after
 the main sections with 3-5 papers that were relevant but fell just below the bar
