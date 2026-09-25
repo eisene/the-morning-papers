@@ -1,12 +1,14 @@
-# state files carry per-machine history; keep config + code in git,
-# but never commit secrets or scratch.
+# Keep config + code in git; never commit secrets or scratch.
 *.tmp
 *.pyc
 __pycache__/
 .env
 config/secrets.json
-# blogwatcher SQLite sidecars (the .db itself IS committed to preserve the
-# read/unread baseline; its WAL/journal are transient and must not be)
-state/blogwatcher.db-wal
-state/blogwatcher.db-shm
-state/blogwatcher.db-journal
+
+# Per-machine runtime state and generated digests are never committed.
+# `make init` recreates state/ locally; digests/sample.md is the format reference.
+state/*
+!state/.gitkeep
+digests/*
+!digests/.gitkeep
+!digests/sample.md

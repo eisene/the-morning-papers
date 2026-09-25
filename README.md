@@ -25,8 +25,8 @@ Runs daily at **10:00 America/New_York** via a Hermes cron job.
 | `scripts/papers.py` | State/config manager — the deterministic backbone. |
 | `scripts/send_email.py` | Digest email delivery (himalaya or SMTP). |
 | `config/` | `config.json`, `interests.json`, `sources.json`. |
-| `state/` | `seen_papers.json`, `runs.jsonl`, `feedback.jsonl`, `retry_state.json`. |
-| `digests/` | `YYYY-MM-DD.md` — each rendered digest. |
+| `state/` | `seen_papers.json`, `runs.jsonl`, `feedback.jsonl`, `retry_state.json`, `blogwatcher.db` — local runtime state, gitignored; created by `make init`. |
+| `digests/` | `YYYY-MM-DD.md` — each rendered digest (gitignored; only `sample.md` is tracked). |
 
 ## Setup
 
@@ -44,7 +44,7 @@ verbosity and cap size, and any extra instructions.
 Feed-backed blogs are tracked with [blogwatcher-cli](https://github.com/JulienTant/blogwatcher-cli)
 so the daily run only surfaces posts that are *new* since yesterday, instead of
 re-scraping every blog. Its SQLite DB lives at `state/blogwatcher.db` (set
-`BLOGWATCHER_DB` to point there). Sources with no discoverable RSS feed stay on
+`BLOGWATCHER_DB` to point there); like the rest of `state/`, it is local and not committed. Sources with no discoverable RSS feed stay on
 direct `web_extract` and are intentionally NOT tracked (a feedless source hangs
 `scan`). Install:
 

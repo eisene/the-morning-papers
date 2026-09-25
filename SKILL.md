@@ -49,7 +49,7 @@ state/seen_papers.json    dedup ledger of every paper ever raised
 state/runs.jsonl          one line per run (success/failed, papers, sections)
 state/feedback.jsonl      useful / not-useful verdicts
 state/retry_state.json    today's attempt count + next-retry timestamp
-digests/YYYY-MM-DD.md     the rendered digest that was emailed
+digests/YYYY-MM-DD.md     the rendered digest that was emailed (gitignored)
 digests/sample.md         canonical example — follow this format, tone, and structure
 ```
 
@@ -125,7 +125,7 @@ Capture `run_id`, `attempt`, `max_attempts`, `wait_minutes` from the JSON.
 - **Blogs & other sources**: two paths depending on whether a feed is set.
   - *Feed-backed blogs* (sources with a non-empty `feed`, tracked by
     blogwatcher-cli): run one scan, then read only new posts. Set the DB path so
-    state lives in the repo:
+    state lives in the repo's (gitignored) state/ dir:
     ```
     export BLOGWATCHER_DB="$MORNING_PAPERS_HOME/state/blogwatcher.db"
     blogwatcher-cli scan            # detects new posts across all tracked feeds
