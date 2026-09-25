@@ -6,12 +6,13 @@
 """Send a Morning Papers digest email.
 
 Two transports:
-  himalaya  -> shells out to the `himalaya` CLI (uses its own account config)
+  himalaya  -> pipes the message into `himalaya message send` (himalaya v2;
+               uses its own account config, see scripts/setup_email.sh)
   smtp      -> direct SMTP using config/config.json + a password from env
 
 Reads recipient / subject / from from config/config.json unless overridden by
-flags. Body is read from --body-file (Markdown). For SMTP a text/plain +
-text/html multipart is sent.
+flags. Body is read from --body-file (Markdown). Both transports send the same
+text/plain + text/html multipart/alternative message.
 
 Markdown rendering prefers the `markdown` package (tables, fenced code, nested
 lists, footnotes) and falls back to a stdlib-only converter when it is absent,
@@ -32,11 +33,13 @@ import datetime as dt
 import json
 import os
 import re
+import shutil
 import smtplib
 import subprocess
 import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.utils import formatdate, make_msgid
 from pathlib import Path
 
 ROOT = Path(os.environ.get("MORNING_PAPERS_HOME", Path(__file__).resolve().parent.parent))
@@ -113,33 +116,41 @@ def _inline(s: str) -> str:
     return s
 
 
-def send_himalaya(to: str, sender: str, subject: str, body_md: str, html: str, dry: bool) -> int:
-    # himalaya `template send` consumes MML (its own markup), NOT a pre-built
-    # MIME message. Feeding raw multipart MIME makes himalaya wrap the whole
-    # blob as one opaque "noname" attachment. So emit headers + an MML
-    # alternative body; himalaya compiles it to proper MIME on send.
-    headers = [f"To: {to}"]
+def build_message(to: str, sender: str, subject: str, body_md: str, html: str) -> MIMEMultipart:
+    """RFC 5322 multipart/alternative (plain Markdown + rendered HTML)."""
+    msg = MIMEMultipart("alternative")
     if sender:
-        headers.append(f"From: {sender}")
-    headers.append(f"Subject: {subject}")
-    template = (
-        "\n".join(headers)
-        + "\n\n"
-        + "<#multipart type=alternative>\n"
-        + body_md.rstrip("\n") + "\n"
-        + "<#part type=text/html>\n"
-        + html + "\n"
-        + "<#/multipart>\n"
-    )
+        msg["From"] = sender
+    msg["To"] = to
+    msg["Subject"] = subject
+    msg["Date"] = formatdate(localtime=True)
+    msg["Message-ID"] = make_msgid()
+    msg.attach(MIMEText(body_md, "plain", "utf-8"))
+    msg.attach(MIMEText(html, "html", "utf-8"))
+    return msg
+
+
+def send_himalaya(to: str, sender: str, subject: str, body_md: str, html: str, dry: bool) -> int:
+    # himalaya v2: `message send` takes a raw RFC 5322 message on stdin and
+    # routes it through the account's SMTP config. (v1's `template send` + MML
+    # no longer exists.) No `--save`: Gmail files SMTP-sent mail into Sent
+    # itself, and a save that fails AFTER delivery would exit non-zero and
+    # invite a retry that re-sends the email.
+    if not sender:
+        print("ERROR: himalaya needs a From address (config set email.from ...)", file=sys.stderr)
+        return 2
+    raw = build_message(to, sender, subject, body_md, html).as_string()
     if dry:
-        print("[dry-run] himalaya template send <<<\n" + template)
+        print("[dry-run] himalaya message send <<<\n" + raw[:800] + "\n...")
         return 0
     proc = subprocess.run(
-        ["himalaya", "template", "send"], input=template, text=True,
+        ["himalaya", "message", "send"], input=raw, text=True,
         capture_output=True,
     )
     sys.stdout.write(proc.stdout)
     sys.stderr.write(proc.stderr)
+    if proc.returncode == 0:
+        print(f"sent via himalaya to {to}")
     return proc.returncode
 
 
@@ -151,12 +162,7 @@ def send_smtp(cfg: dict, to: str, sender: str, subject: str, body_md: str, html:
     if not host and not dry:
         print("ERROR: smtp.host not configured (config set smtp.host ...)", file=sys.stderr)
         return 3
-    msg = MIMEMultipart("alternative")
-    msg["From"] = sender or user
-    msg["To"] = to
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body_md, "plain", "utf-8"))
-    msg.attach(MIMEText(html, "html", "utf-8"))
+    msg = build_message(to, sender or user, subject, body_md, html)
     if dry:
         print(f"[dry-run] SMTP {user}@{host}:{port} tls={s.get('use_tls')} -> {to}")
         print(msg.as_string()[:800] + "\n...")
@@ -198,8 +204,7 @@ def main(argv=None):
     html = md_to_html(body_md)
 
     if transport == "auto":
-        has_himalaya = subprocess.run(["which", "himalaya"], capture_output=True).returncode == 0
-        transport = "himalaya" if has_himalaya else "smtp"
+        transport = "himalaya" if shutil.which("himalaya") else "smtp"
 
     if transport == "himalaya":
         return send_himalaya(to, sender, subject, body_md, html, args.dry_run)

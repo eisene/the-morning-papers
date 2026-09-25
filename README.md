@@ -23,7 +23,9 @@ Runs daily at **10:00 America/New_York** via a Hermes cron job.
 |------|---------|
 | `SKILL.md` | The skill Hermes loads: run procedure, interview, feedback verbs. |
 | `scripts/papers.py` | State/config manager — the deterministic backbone. |
-| `scripts/send_email.py` | Digest email delivery (himalaya or SMTP). |
+| `scripts/send_email.py` | Digest email delivery (himalaya v2 or SMTP). |
+| `scripts/setup_email.sh` | Interactive Gmail + himalaya setup (`make setup-email`). |
+| `docs/email-setup.md` | Email setup guide: app passwords, file vs Keychain vs keyring. |
 | `config/` | `config.json`, `interests.json`, `sources.json`. |
 | `state/` | `seen_papers.json`, `runs.jsonl`, `feedback.jsonl`, `retry_state.json`, `blogwatcher.db` — local runtime state, gitignored; created by `make init`. |
 | `digests/` | `YYYY-MM-DD.md` — each rendered digest (gitignored; only `sample.md` is tracked). |
@@ -33,7 +35,12 @@ Runs daily at **10:00 America/New_York** via a Hermes cron job.
 ```bash
 export MORNING_PAPERS_HOME=$(pwd)
 python3 scripts/papers.py init
+make setup-email      # interactive: himalaya v2 + Gmail app password, test email
 ```
+
+The email setup asks where to keep the Gmail app password (a private file,
+macOS Keychain, or a Linux desktop keyring). See
+[docs/email-setup.md](docs/email-setup.md) for the trade-offs.
 
 Then ask Hermes to "set up the morning papers" — it runs an interview for your
 email address, topics/keywords, labs/authors, seed blog confirmation, digest

@@ -91,8 +91,10 @@ Confirm the seed blog list explicitly.
    and subject
    (`python3 scripts/papers.py config set email.subject_template "... {date}"`).
 
-Finish by confirming email transport works (see Email Delivery) and offering a
-full pipeline `--dry-run` preview (see the Dry-Run section).
+Finish by confirming email transport works: if `himalaya account check` fails
+or himalaya is missing, ask the user to run `make setup-email` in their own
+terminal (see Email Delivery). Then offer a full pipeline `--dry-run` preview
+(see the Dry-Run section).
 
 ## Daily Run Procedure
 
@@ -299,10 +301,62 @@ sees it took effect.
 
 ## Email Delivery
 
-`send_email.py` picks a transport from `email.transport` (`auto` by default):
+`send_email.py` picks a transport from `email.transport` (`auto` by default:
+himalaya if it is on PATH, else smtp):
 
-- **himalaya**: if the `himalaya` CLI is configured (see the `himalaya` skill),
-  `auto` uses it — no extra secrets needed here.
+- **himalaya** (recommended; requires **himalaya v2**): the script builds a
+  multipart/alternative (Markdown text + HTML) RFC 5322 message and pipes it to
+  `himalaya message send`. Account config lives in
+  `~/.config/himalaya/config.toml`; no secrets in this repo.
+  **Setup is interactive and the user must run it themselves** (it prompts for
+  a Gmail app password, which must never pass through chat):
+  ```
+  make setup-email        # = bash scripts/setup_email.sh
+  ```
+  It installs himalaya v2 if needed, asks where to store the app password,
+  writes the himalaya config, verifies the login, sets
+  `email.from`/`email.to`/`email.transport=himalaya`, and offers a test email.
+  To verify later (safe, read-only): `himalaya account check`, then look for
+  `FAIL` in the output (the exit code is 0 either way).
+
+### Guiding the user through email setup
+
+Walk the user through this conversationally *before* they run the script, so
+they can make the password-storage choice knowingly. Full reference:
+`docs/email-setup.md` (point them to it).
+
+1. **Check the current state** (read-only): `himalaya --version` (need v2) and
+   `himalaya account check` (look for `FAIL`). If both are fine, skip setup.
+2. **App password.** Explain that Gmail needs an *app password*, which requires
+   2-Step Verification and is created at https://myaccount.google.com/apppasswords.
+   It only grants mail access and can be revoked on its own. Tell them to keep
+   it ready but **never paste it into chat**; the script prompts for it with
+   hidden input.
+3. **Where to store it.** Detect their OS (`uname -s`) and whether it's
+   headless (no `DISPLAY`/`WAYLAND_DISPLAY`, or they say it's a server/Pi).
+   Explain the trade-off: an unattended job must read the password with nobody
+   present, so anything running as their user can read it whichever option they
+   choose. The options differ in encryption at rest and surviving reboots:
+   - **file** (mode-600 file): works everywhere, including headless and after
+     reboots. Not encrypted at rest. *Recommend on headless Linux.*
+   - **keychain** (macOS Keychain): built in, encrypted, unlocked while logged
+     in. *Recommend on macOS.*
+   - **keyring** (Linux Secret Service via `secret-tool`): encrypted, but
+     locked until a desktop login, so on a headless box the job fails after
+     every reboot until someone logs in. *Reasonable on a Linux desktop.* Needs
+     `libsecret-tools` + `gnome-keyring` (or KWallet), which the user installs
+     with sudo.
+   If they worry about disk theft on a headless box, full-disk encryption is
+   the real fix, not a keyring.
+4. **Hand off.** Give them the paste-ready command to run in their own
+   terminal (it's interactive):
+   `cd <absolute repo path> && make setup-email`
+   The script repeats the explanation and recommends an option; they can
+   override it.
+5. **Verify** after they say it's done: `himalaya account check` (no `FAIL`),
+   then `python3 scripts/papers.py config get email.transport` → `himalaya`.
+   Ask whether the test email arrived (check spam too).
+
 - **smtp**: set `smtp.host`, `smtp.port`, `smtp.username`, and put the password
   in the env var named by `smtp.password_env` (default
   `MORNING_PAPERS_SMTP_PASSWORD`). Never commit the password.
@@ -321,6 +375,8 @@ recipient look right.
 5. **Hard section/paper limits.** The targets are guidelines; a thin news day
    should produce a shorter digest, not padding.
 6. **Committing secrets.** SMTP passwords go in env vars, never the repo.
+   Never ask for or handle the Gmail app password yourself; `make setup-email` prompts for it.
+   Don't store it with commands you run either (`secret-tool store`, `security add-generic-password`).
 7. **Using `python3 -c` for inline JSON parsing or state checks.** The command
    classifier blocks `python3 -c` / `python3 -e` in cron mode. Instead:
    - To read state fields: `python3 scripts/papers.py status | grep -E "..."`
@@ -331,6 +387,11 @@ recipient look right.
    The arXiv API works fine at `https://export.arxiv.org/`. Other sources
    (blogs, feeds) should use `https://` or `web_extract` (which handles TLS
    internally).
+9. **himalaya v1 commands.** `himalaya template send` and `folder.aliases.*`
+   are v1-only and fail on v2. Use `himalaya message send` / `mailbox.alias.*`.
+   Don't retry a send whose SMTP step succeeded; check the inbox first to avoid duplicates.
+10. **Trusting `himalaya account check`'s exit code.** It exits 0 even when a
+   backend fails; read its output for `FAIL`.
 
 ## Verification Checklist
 
