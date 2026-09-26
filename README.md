@@ -26,7 +26,7 @@ Runs daily at **10:00 America/New_York** via a Hermes cron job.
 | `scripts/send_email.py` | Digest email delivery (himalaya v2 or SMTP). |
 | `scripts/setup_email.sh` | Interactive Gmail + himalaya setup (`make setup-email`). |
 | `docs/email-setup.md` | Email setup guide: app passwords, file vs Keychain vs keyring. |
-| `config/` | `config.json`, `interests.json`, `sources.json`. |
+| `config/` | `config.json`, `interests.json`, `sources.json` — your personal config, gitignored; created by `make init` from the defaults in `scripts/papers.py`. |
 | `state/` | `seen_papers.json`, `runs.jsonl`, `feedback.jsonl`, `retry_state.json`, `blogwatcher.db` — local runtime state, gitignored; created by `make init`. |
 | `digests/` | `YYYY-MM-DD.md` — each rendered digest (gitignored; only `sample.md` is tracked). |
 
@@ -109,6 +109,8 @@ See `SKILL.md` for the full verb table and the daily run procedure.
 
 ## Privacy
 
-This repo holds your interests, feedback, and run history. Keep it private.
-Secrets (SMTP password) live in environment variables, never in the repo —
-`.gitignore` also excludes `.env` and `config/secrets.json`.
+Nothing personal is committed: `config/*.json` (email, interests, sources),
+`state/` (feedback, run history, seen papers), and rendered digests are all
+gitignored, so the repo is safe to fork and share. Secrets (SMTP password) live
+in environment variables, never in the repo — `.gitignore` also excludes `.env`
+and `config/secrets.json`.

@@ -19,7 +19,9 @@ blogs, keeps only genuinely novel work matching the user's interests, dedupes
 against everything raised before, organizes the survivors into sections, and
 emails a clean TL;DR Markdown digest.
 
-All persistent state lives in **this repo** (version-controlled, private). The
+All persistent state lives in **this repo's working tree** — `config/*.json`,
+`state/`, and `digests/` are gitignored (the repo is public; never commit
+personal config, interests, or email addresses). The
 agent NEVER hand-edits the JSON — every read/write goes through
 `scripts/papers.py`. Email goes through `scripts/send_email.py`.
 

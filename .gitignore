@@ -1,9 +1,13 @@
-# Keep config + code in git; never commit secrets or scratch.
+# Keep code in git; never commit personal config, secrets, or scratch.
 *.tmp
 *.pyc
 __pycache__/
 .env
 config/secrets.json
+
+# Personal config (email, interests, sources) is per-user and never committed.
+# `make init` generates defaults from scripts/papers.py; the setup interview fills them in.
+config/*.json
 
 # Per-machine runtime state and generated digests are never committed.
 # `make init` recreates state/ locally; digests/sample.md is the format reference.
