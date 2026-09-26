@@ -174,7 +174,8 @@ def send_smtp(cfg: dict, to: str, sender: str, subject: str, body_md: str, html:
         if s.get("use_tls", True):
             server.starttls()
         server.login(user, pw)
-        server.sendmail(msg["From"], [to], msg.as_string())
+        rcpts = [a.strip() for a in to.split(",") if a.strip()]
+        server.sendmail(msg["From"], rcpts, msg.as_string())
     print(f"sent via smtp to {to}")
     return 0
 
