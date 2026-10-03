@@ -4,7 +4,7 @@ A self-contained Hermes skill that emails you a daily TL;DR digest of genuinely
 novel AI research — filtered to your interests, deduped against everything it
 has raised before, and organized into themed sections.
 
-Runs daily at **10:00 America/New_York** via a Hermes cron job.
+Runs daily at **07:00 America/New_York** via a Hermes cron job.
 
 ## What it does
 
