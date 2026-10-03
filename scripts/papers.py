@@ -85,7 +85,7 @@ def default_config() -> dict:
                 "first within each section."
             ),
         },
-        "schedule": {"time": "10:00", "tz": "America/New_York"},
+        "schedule": {"time": "07:00", "tz": "America/New_York"},
         "retry": {"max_attempts": 3, "wait_minutes": 20},
     }
 
