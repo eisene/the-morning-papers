@@ -1,8 +1,9 @@
 # the-morning-papers
 
-A self-contained Hermes skill that emails you a daily TL;DR digest of genuinely
+A self-contained Hermes skill that sends you a daily TL;DR digest of genuinely
 novel AI research — filtered to your interests, deduped against everything it
-has raised before, and organized into themed sections.
+has raised before, and organized into themed sections. It arrives by email, in
+a Discord channel, or both.
 
 Runs daily at **07:00 America/New_York** via a Hermes cron job.
 
@@ -14,7 +15,7 @@ Runs daily at **07:00 America/New_York** via a Hermes cron job.
    incremental benchmark bumps, and routine scaling reports.
 3. Dedupes against every paper raised in prior runs.
 4. Clusters survivors into sections and renders a clean Markdown digest.
-5. Emails it to you.
+5. Emails it to you and/or posts it to Discord through the Hermes gateway.
 6. On failure: waits 20 minutes and retries, up to 3 attempts per day.
 
 ## Layout
@@ -24,6 +25,7 @@ Runs daily at **07:00 America/New_York** via a Hermes cron job.
 | `SKILL.md` | The skill Hermes loads: run procedure, interview, feedback verbs. |
 | `scripts/papers.py` | State/config manager — the deterministic backbone. |
 | `scripts/send_email.py` | Digest email delivery (himalaya v2 or SMTP). |
+| `scripts/render_discord.py` | Discord formatting: no link-preview embeds, length budget for Discord's message limits. |
 | `scripts/setup_email.sh` | Interactive Gmail + himalaya setup (`make setup-email`). |
 | `docs/email-setup.md` | Email setup guide: app passwords, file vs Keychain vs keyring. |
 | `config/` | `config.json`, `interests.json`, `sources.json` — your personal config, gitignored; created by `make init` from the defaults in `scripts/papers.py`. |
@@ -35,16 +37,23 @@ Runs daily at **07:00 America/New_York** via a Hermes cron job.
 ```bash
 export MORNING_PAPERS_HOME=$(pwd)
 python3 scripts/papers.py init
-make setup-email      # interactive: himalaya v2 + Gmail app password, test email
+make setup-email      # email only: himalaya v2 + Gmail app password, test email
+```
+
+Delivery is `email` (default), `discord`, or `both`:
+
+```bash
+python3 scripts/papers.py config set delivery.method discord
 ```
 
 The email setup asks where to keep the Gmail app password (a private file,
 macOS Keychain, or a Linux desktop keyring). See
 [docs/email-setup.md](docs/email-setup.md) for the trade-offs.
 
-Then ask Hermes to "set up the morning papers" — it runs an interview for your
-email address, topics/keywords, labs/authors, seed blog confirmation, digest
-verbosity and cap size, and any extra instructions.
+Then ask Hermes to "set up the morning papers" — it runs an interview for
+delivery (email address and/or Discord channel), topics/keywords, labs/authors,
+seed blog confirmation, digest verbosity and cap size, and any extra
+instructions.
 
 ### Blog watching (blogwatcher-cli)
 
@@ -58,6 +67,23 @@ direct `web_extract` and are intentionally NOT tracked (a feedless source hangs
 ```bash
 curl -sL https://github.com/JulienTant/blogwatcher-cli/releases/latest/download/blogwatcher-cli_linux_amd64.tar.gz | tar xz -C ~/.local/bin blogwatcher-cli
 ```
+
+### Discord delivery
+
+Discord needs no script or credentials of its own: the Hermes cron job's final
+response *is* the digest, and the Hermes gateway posts it to the job's
+`--deliver` target, opening a thread you can reply in with feedback. Your Hermes
+must have Discord connected. Create the job with the channel ID:
+
+```bash
+hermes cron create "0 7 * * *" "Run today's Morning Papers digest ..." \
+  --name the-morning-papers --skill the-morning-papers \
+  --workdir "$(pwd)" --deliver discord:<channel_id>
+```
+
+`scripts/render_discord.py` rewrites the digest for Discord (links without
+preview cards, no horizontal rules) and checks it fits Hermes's per-response
+limit of 8 Discord messages; the agent condenses the Discord copy if not.
 
 ### Email transport
 - **himalaya** (recommended): configure the `himalaya` CLI once; `email.transport`

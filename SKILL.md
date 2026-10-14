@@ -1,13 +1,13 @@
 ---
 name: the-morning-papers
-description: "Use when running or configuring the user's daily AI-paper digest — pull arXiv + Hugging Face + watched blogs, filter for novelty against stated interests, dedupe against prior runs, organize into sections, and email a TL;DR digest. Also handles the setup interview and all feedback/config updates (interests, sources, usefulness, evaluation criteria, digest size, email settings)."
-version: 1.0.0
+description: "Use when running or configuring the user's daily AI-paper digest — pull arXiv + Hugging Face + watched blogs, filter for novelty against stated interests, dedupe against prior runs, organize into sections, and deliver a TL;DR digest by email and/or Discord. Also handles the setup interview and all feedback/config updates (interests, sources, usefulness, evaluation criteria, digest size, delivery and email settings)."
+version: 1.1.0
 author: Hermes Agent
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
   hermes:
-    tags: [research, arxiv, digest, email, cron, papers, monitoring]
+    tags: [research, arxiv, digest, email, discord, cron, papers, monitoring]
     related_skills: [arxiv, blogwatcher, himalaya]
 ---
 
@@ -17,13 +17,15 @@ Daily AI research digest. Every morning at 07:00 America/New_York this skill
 pulls new arXiv papers + the Hugging Face trending feed + a watch-list of lab
 blogs, keeps only genuinely novel work matching the user's interests, dedupes
 against everything raised before, organizes the survivors into sections, and
-emails a clean TL;DR Markdown digest.
+delivers a clean TL;DR Markdown digest by email, Discord, or both
+(`delivery.method`).
 
 All persistent state lives in **this repo's working tree** — `config/*.json`,
 `state/`, and `digests/` are gitignored (the repo is public; never commit
 personal config, interests, or email addresses). The
 agent NEVER hand-edits the JSON — every read/write goes through
-`scripts/papers.py`. Email goes through `scripts/send_email.py`.
+`scripts/papers.py`. Email goes through `scripts/send_email.py`; Discord
+delivery is the cron job's final response, formatted by `scripts/render_discord.py`.
 
 **Invocation note:** all `papers.py` commands below must be run as
 `python3 scripts/papers.py ...` (or `uv run scripts/papers.py ...` if you prefer
@@ -36,7 +38,7 @@ repo root with `MORNING_PAPERS_HOME` set (the cron prompt handles both).
 - **Setup**: "set up the morning papers" → run the Interview (below).
 - **Feedback / config**: any of "add topic X", "I found paper Y useful", "watch
   this blog", "stop watching Z", "make it 3 sections", "change the novelty bar",
-  "update my email / subject / style". Route these to the CLI verbs below — no
+  "update my email / subject / style", "send it to Discord instead". Route these to the CLI verbs below — no
   full run needed.
 
 Don't use for: one-off literature searches (use the `arxiv` skill directly).
@@ -44,14 +46,15 @@ Don't use for: one-off literature searches (use the `arxiv` skill directly).
 ## Layout
 
 ```
-config/config.json        email, digest size, evaluation criteria, schedule, retry
+config/config.json        delivery method, email, digest size, evaluation criteria, schedule, retry
 config/interests.json     topics, keywords, authors/labs to prioritize or exclude
 config/sources.json       watch list (blogs, arxiv feeds, trending sources)
 state/seen_papers.json    dedup ledger of every paper ever raised
 state/runs.jsonl          one line per run (success/failed, papers, sections)
 state/feedback.jsonl      useful / not-useful verdicts
 state/retry_state.json    today's attempt count + next-retry timestamp
-digests/YYYY-MM-DD.md     the rendered digest that was emailed (gitignored)
+digests/YYYY-MM-DD.md     the rendered digest (gitignored)
+digests/YYYY-MM-DD.discord.md  the Discord-formatted copy that was posted (gitignored)
 digests/sample.md         canonical example — follow this format, tone, and structure
 ```
 
@@ -66,10 +69,15 @@ Trigger when config is unset (`python3 scripts/papers.py status` shows
 each answer via the CLI. Ask them conversationally; don't dump all at once.
 Confirm the seed blog list explicitly.
 
-1. **Email address** — where digests go. →
-   `python3 scripts/papers.py config set email.to <addr>`
-   (also ask the From address if different →
-   `python3 scripts/papers.py config set email.from <addr>`).
+1. **Delivery** — email, Discord, or both? →
+   `python3 scripts/papers.py config set delivery.method email|discord|both`
+   - *email* / *both*: ask where digests go →
+     `python3 scripts/papers.py config set email.to <addr>` (and the From
+     address if different → `config set email.from <addr>`).
+   - *discord* / *both*: the digest is posted by the Hermes **gateway** as the
+     cron job's final response, so Hermes must have Discord connected and the
+     job is created with `--deliver discord:<channel_id>` (see Discord
+     Delivery). Ask which channel or DM; nothing goes in config.json.
 2. **Topics / keywords** — initial interests. →
    `python3 scripts/papers.py interests add topics ...` and
    `python3 scripts/papers.py interests add keywords ...`.
@@ -93,10 +101,11 @@ Confirm the seed blog list explicitly.
    and subject
    (`python3 scripts/papers.py config set email.subject_template "... {date}"`).
 
-Finish by confirming email transport works: if `himalaya account check` fails
-or himalaya is missing, ask the user to run `make setup-email` in their own
-terminal (see Email Delivery). Then offer a full pipeline `--dry-run` preview
-(see the Dry-Run section).
+Finish by confirming the transport works. Email: if `himalaya account check`
+fails or himalaya is missing, ask the user to run `make setup-email` in their
+own terminal (see Email Delivery). Discord: create the cron job (see Discord
+Delivery). Then offer a full pipeline `--dry-run` preview (see the Dry-Run
+section).
 
 ## Daily Run Procedure
 
@@ -203,13 +212,35 @@ seen — **main-section papers only, never the near-miss list**:
 python3 scripts/papers.py seen add "<url-or-id>" --title "<title>" --source "<source name>" --run-id <run_id>
 ```
 
-### 7. Email
+### 7. Deliver
+
+Check `delivery_method` in `python3 scripts/papers.py status` (missing =
+`email`).
+
+**Email** (`email` or `both`):
 
 ```
 uv run scripts/send_email.py --body-file digests/YYYY-MM-DD.md
 ```
 
-Verify exit code 0. (Use `--dry-run` first if unsure.) `uv run` provisions the
+**Discord** (`discord` or `both`): write a Discord version and make it the
+job's final response (the gateway posts it; never post it yourself with a
+send-message tool, or it arrives twice):
+
+```
+python3 scripts/render_discord.py --body-file digests/YYYY-MM-DD.md --out digests/YYYY-MM-DD.discord.md
+```
+
+If the JSON says `over_budget: true`, the post would be cut off by the
+gateway's 8-message cap. Tighten the **Discord copy only** (shorter TL;DRs,
+drop the near-miss list to one line each or remove it) by writing a condensed
+`digests/YYYY-MM-DD.discord-src.md`, re-render it to `.discord.md`, and repeat
+until it fits. Every paper in the main sections stays, with its link. The
+full digest in `digests/YYYY-MM-DD.md` is unchanged. Then, after steps 8 and
+`run finish` succeed, your final response is **exactly the contents of
+`digests/YYYY-MM-DD.discord.md`**, with nothing before or after it.
+
+For email, verify exit code 0. (Use `--dry-run` first if unsure.) `uv run` provisions the
 `markdown` package (declared as a PEP 723 dep) in a cached ephemeral env, so
 digests render tables, fenced code, and nested lists with no venv to manage. If
 `uv` is unavailable, fall back to `python3 scripts/send_email.py ...` — it uses
@@ -254,6 +285,7 @@ state-mutating commands:
 | `python3 scripts/papers.py run finish success` | `python3 scripts/papers.py run finish ... --dry-run` — prints what would be recorded, skips runs.jsonl + retry reset |
 | `uv run scripts/send_email.py` | `uv run scripts/send_email.py --dry-run` — prints the rendered HTML (already worked before this section existed) |
 | `blogwatcher-cli read-all` | **Skip it entirely** — keep posts unread so they appear in the next test run too |
+| Discord final response | `render_discord.py` is read-only; the post only happens if the run is a cron job. In a manual dry run, show the rendered text instead. |
 
 All gather steps (`seen filter`, `web_extract`, `blogwatcher-cli scan`,
 `blogwatcher-cli articles`) are read-only and need no special flag.
@@ -297,9 +329,41 @@ Route natural-language requests to these. All take `MORNING_PAPERS_HOME` in env.
 | change email address / from | `python3 scripts/papers.py config set email.to <addr>` / `email.from <addr>` |
 | change subject line | `python3 scripts/papers.py config set email.subject_template "... {date}"` |
 | change email style | `python3 scripts/papers.py config set email.style_instructions "<text>"` |
+| switch email ↔ Discord | `python3 scripts/papers.py config set delivery.method email\|discord\|both` (Discord also needs the cron job's `--deliver`; see Discord Delivery) |
 
 After any change, echo back the resulting value (the CLI prints it) so the user
 sees it took effect.
+
+## Discord Delivery
+
+Discord delivery uses the Hermes gateway, not a script: the cron job's final
+response is posted to the job's `--deliver` target. Requirements:
+
+- The Hermes running the job has Discord connected (`hermes gateway` with a
+  bot token) and the bot can post in the target channel.
+- `delivery.method` is `discord` or `both`.
+- The job delivers to the channel, e.g.
+  `hermes cron create "0 7 * * *" "<prompt>" --name the-morning-papers --skill the-morning-papers --workdir <repo> --deliver discord:<channel_id>`.
+  Channel IDs: Discord developer mode → right-click channel → Copy Channel ID,
+  or the gateway's `~/.hermes/channel_directory.json`.
+
+Formatting (`render_discord.py`): masked links become `[text](<url>)` and
+bare URLs `<url>` so ~15 papers don't spawn ~15 preview cards; horizontal
+rules are dropped and `####` headings become bold. Discord caps messages at
+2000 chars and the Hermes adapter caps one response at 8 messages, so keep the
+Discord copy under the script's budget (see step 7).
+
+**Feedback over Discord.** Each run's post opens its own thread (Hermes's
+default cron surface). A reply in that thread is a normal conversation, which
+may or may not include the post itself as context. Always resolve references
+like "the second agents paper" against `digests/YYYY-MM-DD.md` (the date of
+the post, which the thread title or header shows), then record them with
+`feedback add` as usual.
+
+**Shared bots.** If the Hermes bot is shared (several people can talk to it),
+only the digest's owner may change Morning Papers config, interests, sources
+or feedback. Name the owner's Discord user IDs in the bot's SOUL.md or the
+cron prompt, and decline changes from anyone else.
 
 ## Email Delivery
 
@@ -370,7 +434,7 @@ recipient look right.
 
 1. **Editing JSON by hand.** Don't. Use the CLI so schema/dedup stay consistent.
 2. **Selecting on titles.** Read abstracts before judging novelty.
-3. **Forgetting to mark seen.** If you email a paper without `seen add`, it will
+3. **Forgetting to mark seen.** If you deliver a paper without `seen add`, it will
    resurface tomorrow. Mark every raised paper.
 4. **Resetting retries.** Never `init --force` on a failure; the retry count
    lives in `retry_state.json` and must survive across re-invocations.
@@ -402,5 +466,5 @@ recipient look right.
 - [ ] Abstracts read for every selected paper.
 - [ ] Digest written to `digests/YYYY-MM-DD.md`, every paper linked.
 - [ ] Every raised paper recorded with `seen add`.
-- [ ] Email sent (exit 0) or failure recorded + retry logic followed.
+- [ ] Delivered: email sent (exit 0) and/or Discord copy under budget and returned as the final response; or failure recorded + retry logic followed.
 - [ ] `run finish` called with the correct status.

@@ -45,6 +45,14 @@ TODAY = lambda: dt.date.today().isoformat()
 # ---------------------------------------------------------------------------
 def default_config() -> dict:
     return {
+        # How the digest reaches the reader. "email" sends via scripts/send_email.py;
+        # "discord" makes the digest the Hermes cron job's final response, which the
+        # gateway posts to the job's --deliver target (scripts/render_discord.py);
+        # "both" does both. Discord needs no settings here: the target lives on the
+        # cron job. Missing key = "email" (configs written before this existed).
+        "delivery": {
+            "method": "email",  # email | discord | both
+        },
         "email": {
             "to": "",
             "from": "",
@@ -257,10 +265,15 @@ def cmd_status(args):
     runs = _read_jsonl(RUNS_FILE)
     retry = _load(RETRY_FILE, default_retry)
     last_success = next((r for r in reversed(runs) if r.get("status") == "success"), None)
+    method = delivery_method(cfg)
+    email_ok = bool(cfg.get("email", {}).get("to"))
     _out(
         {
             "root": str(ROOT),
-            "configured": bool(cfg.get("email", {}).get("to")),
+            # discord needs nothing in config (the cron job owns the target);
+            # email / both need a recipient.
+            "configured": method in DELIVERY_METHODS and (method == "discord" or email_ok),
+            "delivery_method": method,
             "email_to": cfg.get("email", {}).get("to", ""),
             "digest": cfg.get("digest", {}),
             "counts": {
@@ -305,6 +318,13 @@ def _dotset(d, path, value):
     cur[keys[-1]] = value
 
 
+DELIVERY_METHODS = ("email", "discord", "both")
+
+
+def delivery_method(cfg: dict) -> str:
+    return (cfg.get("delivery") or {}).get("method") or "email"
+
+
 def cmd_config(args):
     cfg = _load(CONFIG_FILE, default_config)
     if args.config_action == "show":
@@ -312,6 +332,9 @@ def cmd_config(args):
     elif args.config_action == "get":
         _out({args.key: _dotget(cfg, args.key)})
     elif args.config_action == "set":
+        if args.key == "delivery.method" and args.value not in DELIVERY_METHODS:
+            print(f"ERROR: delivery.method must be one of {list(DELIVERY_METHODS)}", file=sys.stderr)
+            sys.exit(2)
         _dotset(cfg, args.key, args.value)
         _save(CONFIG_FILE, cfg)
         _out({"set": args.key, "value": _dotget(cfg, args.key)})

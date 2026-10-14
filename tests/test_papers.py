@@ -77,6 +77,61 @@ def test_interests():
     check("unknown field rejected", bad.get("_rc") == 2)
 
 
+def test_delivery():
+    check("delivery defaults to email", papers("status")["delivery_method"] == "email")
+    papers("config", "set", "delivery.method", "discord")
+    st = papers("status")
+    check("discord-only is configured without email.to", st["configured"] is True
+          and st["delivery_method"] == "discord")
+    papers("config", "set", "delivery.method", "both")
+    check("both needs email.to", papers("status")["configured"] is False)
+    bad = papers("config", "set", "delivery.method", "pigeon", expect_ok=False)
+    check("unknown delivery method rejected", bad.get("_rc") == 2)
+    check("rejected value not saved",
+          papers("config", "get", "delivery.method")["delivery.method"] == "both")
+    papers("config", "set", "delivery.method", "email")
+    # an old config with no delivery block still reads as email
+    cfg_path = _home / "config" / "config.json"
+    cfg = json.loads(cfg_path.read_text())
+    cfg.pop("delivery")
+    cfg_path.write_text(json.dumps(cfg))
+    check("missing delivery block reads as email", papers("status")["delivery_method"] == "email")
+
+
+def test_discord_render():
+    sys.path.insert(0, str(REPO / "scripts"))
+    import render_discord  # noqa: E402
+    md = (
+        "# Title\n\n---\n\n## Sec\n\n"
+        "- **[Paper](https://arxiv.org/abs/2401.01234)** — TL;DR.\n"
+        "- bare https://example.com/x. and <https://already.wrapped/>\n"
+        "- code `https://in.code/` stays\n\n"
+        "#### Deep heading\n\n\n\n"
+        "```\nhttps://in.fence/\n---\n```\n"
+    )
+    out = render_discord.render(md)
+    check("masked link wrapped (no embed)", "[Paper](<https://arxiv.org/abs/2401.01234>)" in out)
+    check("bare url wrapped, trailing dot kept outside", "<https://example.com/x>." in out)
+    check("already-wrapped url untouched", "<https://already.wrapped/>" in out
+          and "<<https://already" not in out)
+    check("inline code untouched", "`https://in.code/`" in out)
+    check("fenced block untouched", "```\nhttps://in.fence/\n---\n```" in out)
+    check("hr dropped outside fences", "\n---\n\n## Sec" not in out and "# Title\n\n## Sec" in out)
+    check("deep heading -> bold", "**Deep heading**" in out and "####" not in out)
+    check("blank runs collapsed", "\n\n\n" not in out)
+    dg = _home / "digests"
+    dg.mkdir(exist_ok=True)
+    (dg / "d.md").write_text(md)
+    r = subprocess.run(
+        [sys.executable, str(REPO / "scripts" / "render_discord.py"),
+         "--body-file", str(dg / "d.md"), "--out", str(dg / "d.discord.md"), "--budget", "50"],
+        capture_output=True, text=True,
+    )
+    info = json.loads(r.stdout)
+    check("render cli writes file + reports budget", r.returncode == 0
+          and (dg / "d.discord.md").exists() and info["over_budget"] is True)
+
+
 def test_config():
     papers("config", "set", "email.to", "me@x.com")
     papers("config", "set", "digest.target_paper_count", "9")
@@ -220,7 +275,7 @@ def test_email_render():
 
 
 TESTS = [
-    test_init_status, test_interests, test_config, test_sources,
+    test_init_status, test_delivery, test_discord_render, test_interests, test_config, test_sources,
     test_seen_dedup, test_feedback, test_run_and_retry, test_email_render,
 ]
 

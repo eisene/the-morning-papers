@@ -1,4 +1,4 @@
-.PHONY: test init status dry-run setup-email
+.PHONY: test init status dry-run discord-preview setup-email
 
 # Run the end-to-end test suite (isolated temp home; never touches repo state).
 test:
@@ -16,6 +16,10 @@ status:
 dry-run:
 	MORNING_PAPERS_HOME=$(CURDIR) uv run scripts/send_email.py \
 		--body-file digests/$$(date +%F).md --dry-run
+
+# Preview today's digest as it would be posted to Discord.
+discord-preview:
+	python3 scripts/render_discord.py --body-file digests/$$(date +%F).md
 
 # Interactive: install himalaya v2, store a Gmail app password, write the
 # himalaya config, verify login, optionally send a test email.
