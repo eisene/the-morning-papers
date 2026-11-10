@@ -277,7 +277,28 @@ def test_render_and_email_digest_flag():
           and "To: reader@example.com" in e.stdout and subj.startswith("The Morning Headlines — "))
 
 
+def test_headlines_sample():
+    sys.path.insert(0, str(REPO))
+    from digestkit.core import digest_main_links
+    from digestkit.discord import render
+    from digestkit.specs import headlines as hs
+    md = (REPO / "headlines" / "digests" / "sample.md").read_text()
+    heads = [ln[3:].strip() for ln in md.splitlines() if ln.startswith("## ")]
+    check("sample has every section in order", heads == [t for _, t in hs.SECTIONS])
+    top = md.split("## ⭐ Top Stories", 1)[1]
+    first = next(ln for ln in top.splitlines() if ln.strip())
+    check("sample Top Stories starts with a '1.' line", first.startswith("1. **["))
+    links = digest_main_links(md, hs.SPEC.near_miss_headings)
+    check("sample main links exclude Also notable", len(links) == 16
+          and not any(ln["section"] == "Also notable" for ln in links))
+    check("sample exercises Also:, open-weights, API, tech-report pointer",
+          "*Also:*" in md and "[open-weights]" in md and "[API]" in md and "see The Morning Papers" in md)
+    check("sample fits the Discord budget", len(render(md)) < 10500)
+    check("sample has no email addresses", "@" not in md)
+
+
 TESTS = [
+    (test_headlines_sample, False),
     (test_init, True), (test_config_interests, True), (test_sources, True), (test_feedback_runs, True),
     (test_home_precedence, False), (test_decisions, False), (test_snapshot, False),
     (test_render_and_email_digest_flag, False),
