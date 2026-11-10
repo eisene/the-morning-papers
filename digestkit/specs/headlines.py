@@ -89,8 +89,10 @@ def default_interests() -> dict:
     }
 
 
+# abs:AI matters: many econ abstracts say only "AI" (e.g. arXiv:2611.05417
+# "Organizing Intelligence", econ.TH, which the phrase-only query missed).
 ARXIV_ECON_QUERY = (
-    '(cat:econ.GN OR cat:econ.TH OR cat:econ.EM) AND (abs:"artificial intelligence" '
+    '(cat:econ.GN OR cat:econ.TH OR cat:econ.EM) AND (abs:AI OR abs:"artificial intelligence" '
     'OR abs:"language model" OR abs:"large language" OR abs:automation OR abs:AGI)'
 )
 ARXIV_ECON_URL = (
