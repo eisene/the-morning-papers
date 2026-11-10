@@ -30,7 +30,9 @@ _env: dict
 def setup() -> None:
     global _home, _env
     _home = Path(tempfile.mkdtemp(prefix="hermes-verify-mp-"))
-    _env = {**os.environ, "MORNING_PAPERS_HOME": str(_home)}
+    _env = {**os.environ, "MORNING_PAPERS_HOME": str(_home),
+            # cross-digest dedup reads the headlines ledger too; keep it isolated
+            "MORNING_HEADLINES_HOME": str(_home / "no-headlines")}
 
 
 def teardown() -> None:

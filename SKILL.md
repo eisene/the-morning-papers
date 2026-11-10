@@ -1,14 +1,14 @@
 ---
 name: the-morning-papers
 description: "Use when running or configuring the user's daily AI-paper digest — pull arXiv + Hugging Face + watched blogs, filter for novelty against stated interests, dedupe against prior runs, organize into sections, and deliver a TL;DR digest by email and/or Discord. Also handles the setup interview and all feedback/config updates (interests, sources, usefulness, evaluation criteria, digest size, delivery and email settings)."
-version: 1.1.0
+version: 1.2.0
 author: Hermes Agent
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [research, arxiv, digest, email, discord, cron, papers, monitoring]
-    related_skills: [arxiv, blogwatcher, himalaya]
+    related_skills: [arxiv, blogwatcher, himalaya, the-morning-headlines]
 ---
 
 # The Morning Papers
@@ -55,11 +55,34 @@ state/feedback.jsonl      useful / not-useful verdicts
 state/retry_state.json    today's attempt count + next-retry timestamp
 digests/YYYY-MM-DD.md     the rendered digest (gitignored)
 digests/YYYY-MM-DD.discord.md  the Discord-formatted copy that was posted (gitignored)
+digests/YYYY-MM-DD.decisions.jsonl  optional decision log (step 4b)
 digests/sample.md         canonical example — follow this format, tone, and structure
+headlines/                The Morning Headlines (sibling digest, own SKILL.md and state)
 ```
 
 Set `MORNING_PAPERS_HOME` to the repo root before every CLI call (the cron
-prompt does this). All `python3 scripts/papers.py` output is JSON on stdout.
+prompt does this; `--home <dir>` before the subcommand does the same). All
+`python3 scripts/papers.py` output is JSON on stdout.
+
+The CLI is built from the shared core in `digestkit/`, which also runs The
+Morning Headlines (`headlines/SKILL.md`, state under `headlines/`). Commands,
+flags, files and JSON fields here are unchanged; the only addition you'll see
+is `peer_seen` (see Dedupe).
+
+## Routing: papers vs headlines
+
+The Morning Headlines runs first (06:45) and reads some of the same lab
+blogs. One item never appears in both digests:
+
+- **Papers**: research results (papers; lab posts whose substance is a
+  technical finding).
+- **Headlines**: releases, launches, leaderboards, business, econ / policy /
+  institute essays. A model release with a tech report goes in headlines with
+  the report linked; headlines records the report's arXiv id so it shows up
+  here as `peer_seen`, and you skip it. When the report is a real
+  methodological contribution, headlines leaves the id unrecorded and writes
+  "Tech report → see The Morning Papers": it then comes through as `unseen`
+  and is yours to judge.
 
 ## First-Run Interview
 
@@ -166,6 +189,9 @@ printf '%s\n' <id-or-url per line> | python3 scripts/papers.py seen filter
 The output is a JSON object — the `unseen` array contains entries like
 `{"input": "https://arxiv.org/abs/2401.01234", "key": "arxiv:2401.01234"}`.
 Only work with the returned `unseen` entries (use their `key` for reference).
+`peer_seen` lists inputs already raised by The Morning Headlines (with the
+`digest` and its `record`); they are left out of `unseen` on purpose; don't
+add them back. `seen has` reports the same as `peer_seen` / `peer_digest`.
 
 ### 4. Select for novelty & relevance
 
@@ -176,6 +202,20 @@ carry a genuinely new idea. Honor `authors_exclude`/`labs_exclude`. Boost items
 from high-`usefulness` sources and topics the user marked useful in feedback.
 Read abstracts (`web_extract` on the abstract page) before judging — don't
 select on title alone.
+
+### 4b. Decision log (optional, recommended)
+
+Write `digests/YYYY-MM-DD.decisions.jsonl`, one line per candidate you
+considered: `{"id","title","source","opened","decision","reason"}` with
+`decision` one of `main`, `near-miss`, `dropped` and `opened` true/false
+(whether you read the abstract). After rendering (step 6), check it:
+
+```
+python3 scripts/papers.py decisions check digests/YYYY-MM-DD.decisions.jsonl --digest-file digests/YYYY-MM-DD.md
+```
+
+Exit 0 = valid and consistent with the digest's main sections (the near-miss
+section is ignored). Fix what it reports and re-run.
 
 ### 5. Organize
 
@@ -320,8 +360,8 @@ Route natural-language requests to these. All take `MORNING_PAPERS_HOME` in env.
 | general standing instruction | `python3 scripts/papers.py interests set-instructions "<text>"` |
 | "I found paper X useful/useless" | `python3 scripts/papers.py feedback add "<url-or-id>" useful\|not-useful --note "<why>" --source "<source>"` |
 | review recent feedback verdicts | `python3 scripts/papers.py feedback summary` |
-| watch a new source | `python3 scripts/papers.py sources add "<Name>" "<url>" --type blog\|arxiv\|trending\|other --feed "<rss?>"` |
-| stop watching a source | `python3 scripts/papers.py sources disable "<name>"` (or `remove <name> --hard` to delete) |
+| watch a new source | `python3 scripts/papers.py sources add "<Name>" "<url>" --type blog\|arxiv\|trending\|other --feed "<rss?>"` (then `sources sync-blogwatcher --dry-run` / without `--dry-run` to track its feed) |
+| stop watching a source | `python3 scripts/papers.py sources disable "<name>"` (or `remove <name> --hard` to delete; `sources enable "<name>"` undoes a disable) |
 | a source has been great/bad | `python3 scripts/papers.py sources bump "<name>" <+/-N>` |
 | change novelty/usefulness/organization bar | `python3 scripts/papers.py config set evaluation.novelty_criteria "<text>"` (or `.usefulness_criteria`, `.organization`) |
 | change section / paper targets | `python3 scripts/papers.py config set digest.target_sections N` / `digest.target_paper_count N` |
