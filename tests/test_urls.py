@@ -104,11 +104,11 @@ def test_keys():
 # ---------------------------------------------------------------------------
 # items group (CLI)
 # ---------------------------------------------------------------------------
-def hl(home, *args, stdin=None, expect_ok=True):
+def hl(home, *args, stdin=None, expect_ok=True, cwd=None):
     env = {**os.environ, "MORNING_HEADLINES_HOME": str(home),
            "MORNING_PAPERS_HOME": str(home.parent / "papers-none")}
     r = subprocess.run([sys.executable, str(HEADLINES), *args], env=env, input=stdin,
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, cwd=cwd)
     if expect_ok:
         assert r.returncode == 0, f"{args} exited {r.returncode}: {r.stderr}"
     return json.loads(r.stdout) if r.stdout.strip() else {"_rc": r.returncode, "_err": r.stderr}
@@ -169,6 +169,19 @@ def test_group():
         g4 = hl(home, "items", "group", stdin="https://openai.com/index/widget-5\nhttps://example.com/x\n")
         check("newline input accepted; seen by key", g4["count"] == 2 and g4["groups"][0]["seen"] is True
               and g4["groups"][1]["seen"] is False)
+        # --file: a relative digests/... path resolves under the headlines home,
+        # even when run from a cwd that has no such file (as the SKILL documents)
+        (home / "digests").mkdir(parents=True, exist_ok=True)
+        (home / "digests" / "D.candidates.json").write_text(json.dumps(LAUNCH))
+        elsewhere = home.parent / "elsewhere"
+        elsewhere.mkdir()
+        g5 = hl(home, "items", "group", "--file", "digests/D.candidates.json", cwd=str(elsewhere))
+        check("--file relative path resolves under home", g5["input_count"] == 6 and g5["count"] == 2)
+        g6 = hl(home, "items", "group", "--file", str(home / "digests" / "D.candidates.json"))
+        check("--file absolute path works", g6["input_count"] == 6)
+        miss = hl(home, "items", "group", "--file", "digests/nope.json", expect_ok=False)
+        check("--file missing -> clean exit 2", miss.get("_rc") == 2 and "not found" in miss.get("_err", "")
+              and "Traceback" not in miss.get("_err", ""))
     finally:
         shutil.rmtree(home.parent, ignore_errors=True)
 

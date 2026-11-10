@@ -23,7 +23,7 @@ from pathlib import Path
 from . import items as items_mod
 from . import specs as specs_mod
 from .specs import DigestSpec
-from .store import append_jsonl, load_json, now_iso, out, read_jsonl, save_json, slug, today
+from .store import append_jsonl, die, load_json, now_iso, out, read_jsonl, save_json, slug, today
 from .urls import is_url, item_key, legacy_key, match_keys, normalize_tag, record_match_keys
 
 DELIVERY_METHODS = ("email", "discord", "both")
@@ -542,7 +542,13 @@ def cmd_seen(ctx: Ctx, args):
 # ---------------------------------------------------------------------------
 def cmd_items(ctx: Ctx, args):
     sp = ctx.spec
-    raw_in = (Path(args.file).read_text() if args.file else sys.stdin.read()).strip()
+    if args.file:
+        path = ctx.resolve(args.file)
+        if not path.exists():
+            die(f"{path} not found")
+        raw_in = path.read_text().strip()
+    else:
+        raw_in = sys.stdin.read().strip()
     if raw_in.startswith("["):
         cands = json.loads(raw_in)
     elif raw_in.startswith("{"):
