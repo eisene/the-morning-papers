@@ -16,3 +16,13 @@ state/*
 digests/*
 !digests/.gitkeep
 !digests/sample.md
+
+# The Morning Headlines (headlines/) follows the same rules: personal config,
+# runtime state and generated digests stay local; headlines/digests/sample.md
+# is the tracked format reference.
+headlines/config/*.json
+headlines/state/*
+!headlines/state/.gitkeep
+headlines/digests/*
+!headlines/digests/.gitkeep
+!headlines/digests/sample.md

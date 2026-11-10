@@ -1,83 +1,44 @@
 #!/usr/bin/env python3
-"""Render a Morning Papers digest (Markdown) for posting to Discord.
+"""Render a Morning digest (Markdown) for posting to Discord.
 
-Stdlib only. Discord renders a subset of Markdown, so this rewrites the digest:
-  - [text](url)  -> [text](<url>)   masked link, no preview embed
-  - bare https:// -> <https://...>  no preview embed
-  - ---, ***, ___ horizontal rules dropped (Discord shows them literally)
-  - #### and deeper headings -> **bold line** (Discord has only #, ##, ###)
-  - runs of blank lines collapsed
+Stdlib only. Thin wrapper over digestkit.discord (see there for the rules):
+masked links -> [t](<url>), bare URLs -> <url>, drops ---, #### -> bold,
+collapses blank runs, and flags output over the length budget (Hermes posts at
+most 8 Discord messages per response).
 
-Pipe tables are left alone; the Hermes Discord adapter turns them into bullets.
+Over budget: condense the Discord text (shorter TL;DRs, trim the near-miss /
+also-notable list); the full digest stays on disk.
 
-The output is what the Hermes cron job returns as its final response; the
-gateway posts it, split into <=2000-char messages, into a fresh thread. The
-Hermes Discord adapter caps one response at 8 messages and replaces the rest
-with a truncation notice. Splits land on line boundaries (~1600 chars per
-message in practice) and the cron header/footer take a few hundred more, so the
-script flags anything over --budget (default 10500 chars, about 7 messages).
-Over budget: condense the Discord text (shorter TL;DRs, trim the near-miss
-list); the full digest stays on disk.
+--digest papers|headlines or --home only changes where relative --body-file /
+--out paths are looked up: under that digest's home first (e.g. headlines/),
+then the cwd. Without either flag paths are cwd-relative, as before. Rendering
+is the same for both digests.
 
 Usage:
   render_discord.py --body-file digests/2026-07-01.md                # print to stdout
   render_discord.py --body-file d.md --out digests/2026-07-01.discord.md   # write file, print JSON
+  render_discord.py --digest headlines --body-file digests/D.md --out digests/D.discord.md
 """
 from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 from pathlib import Path
 
-DEFAULT_BUDGET = 10500
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-_FENCE = re.compile(r"^\s*(```|~~~)")
-_HR = re.compile(r"^\s*([-*_])(\s*\1){2,}\s*$")
-_DEEP_HEADING = re.compile(r"^(#{4,6})\s+(.*?)\s*#*\s*$")
-# [text](url) or [text](url "title") whose url is not already <wrapped>
-_MASKED = re.compile(r"\[([^\]]+)\]\((?!<)(https?://[^\s)]+)(?:\s+\"[^\"]*\")?\)")
-# bare URL not already inside <...>, (...) or [...]
-_BARE = re.compile(r"(?<![<(\[])\b(https?://[^\s<>()\[\]]+[^\s<>()\[\].,;:!?'\"*_])")
+from digestkit.discord import DEFAULT_BUDGET, render, summary  # noqa: E402,F401
+from digestkit import specs  # noqa: E402
 
 
-def _inline(line: str) -> str:
-    # Shield inline code spans so URLs inside them stay untouched.
-    parts = re.split(r"(`[^`]*`)", line)
-    out = []
-    for p in parts:
-        if p.startswith("`") and p.endswith("`") and len(p) >= 2:
-            out.append(p)
-            continue
-        p = _MASKED.sub(lambda m: f"[{m.group(1)}](<{m.group(2)}>)", p)
-        # wrap remaining bare URLs (masked ones are now inside <...>)
-        p = _BARE.sub(lambda m: f"<{m.group(1)}>", p)
-        out.append(p)
-    return "".join(out)
-
-
-def render(md: str) -> str:
-    lines_out: list[str] = []
-    in_fence = False
-    for line in md.splitlines():
-        if _FENCE.match(line):
-            in_fence = not in_fence
-            lines_out.append(line)
-            continue
-        if in_fence:
-            lines_out.append(line)
-            continue
-        if _HR.match(line):
-            lines_out.append("")
-            continue
-        m = _DEEP_HEADING.match(line)
-        if m:
-            line = f"**{m.group(2)}**"
-        lines_out.append(_inline(line.rstrip()))
-    text = "\n".join(lines_out)
-    text = re.sub(r"\n{3,}", "\n\n", text).strip() + "\n"
-    return text
+def _resolve(p: str, home: Path | None, parent_only: bool = False) -> Path:
+    """Relative paths try the digest home first, then the cwd."""
+    path = Path(p)
+    if home is None or path.is_absolute():
+        return path
+    alt = home / path
+    return alt if (alt.parent if parent_only else alt).exists() else path
 
 
 def main(argv=None) -> int:
@@ -85,9 +46,15 @@ def main(argv=None) -> int:
     ap.add_argument("--body-file", required=True, help="digest Markdown")
     ap.add_argument("--out", help="write the Discord text here and print a JSON summary")
     ap.add_argument("--budget", type=int, default=DEFAULT_BUDGET, help="max chars before flagging")
+    ap.add_argument("--digest", choices=specs.names(), default=None,
+                    help="which digest (default papers); resolves relative paths under its home")
+    ap.add_argument("--home", default=None, help="digest home (overrides --digest's default)")
     args = ap.parse_args(argv)
 
-    src = Path(args.body_file)
+    home = None
+    if args.home or args.digest:
+        home = specs.get(args.digest or "papers").home(args.home)
+    src = _resolve(args.body_file, home)
     if not src.exists():
         print(f"ERROR: {src} not found", file=sys.stderr)
         return 2
@@ -95,15 +62,9 @@ def main(argv=None) -> int:
     if not args.out:
         sys.stdout.write(text)
         return 0
-    out = Path(args.out)
+    out = _resolve(args.out, home, parent_only=True)
     out.write_text(text)
-    print(json.dumps({
-        "out": str(out),
-        "chars": len(text),
-        "budget": args.budget,
-        "over_budget": len(text) > args.budget,
-        "approx_messages": -(-len(text) // 1600),
-    }, indent=2))
+    print(json.dumps(summary(text, str(out), args.budget), indent=2))
     return 0
 
 
